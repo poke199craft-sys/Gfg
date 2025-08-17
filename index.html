@@ -57,11 +57,11 @@
       font-size: 1.5rem;
       font-weight: bold;
       padding: 10px 10px;
-      border: 1px solid #9c88ff; /* হালকা পার্পল বর্ডার */
+      border: 1px solid #9c88ff;
       border-radius: 8px;
-      background: rgba(156, 136, 255, 0.1); /* হালকা ট্রান্সপারেন্ট ব্যাকগ্রাউন্ড */
-      color: #e0e0e0; /* হালকা সাদা টেক্সট */
-      box-shadow: 0 0 8px rgba(156, 136, 255, 0.3); /* সাবটল শ্যাডো */
+      background: rgba(156, 136, 255, 0.1);
+      color: #e0e0e0;
+      box-shadow: 0 0 8px rgba(156, 136, 255, 0.3);
       min-width: 100px;
       position: relative;
       transition: all 0.3s ease;
@@ -72,10 +72,10 @@
       font-size: 1rem;
       font-weight: bold;
       padding: 5px;
-      border: 1px solid #9c88ff; /* হালকা পার্পল বর্ডার */
+      border: 1px solid #9c88ff;
       border-radius: 5px;
-      background: rgba(156, 136, 255, 0.1); /* হালকা ট্রান্সপারেন্ট ব্যাকগ্রাউন্ড */
-      color: #e0e0e0; /* হালকা সাদা টেক্সট */
+      background: rgba(156, 136, 255, 0.1);
+      color: #e0e0e0;
       width: 30px;
       height: 40px;
       display: flex;
@@ -272,7 +272,6 @@
     const adminSettingsRef = database.ref('adminSettings');
     const telegramLinkRef = database.ref('telegramLink');
 
-   
     var systemActive = true;
     var lastIssueNumber = null;
     var webviewShown = false;
@@ -470,6 +469,24 @@
       // Update number box with most frequent number from first database
       numberBox.innerText = mostFrequentNumber;
 
+      // Calculate color predictions (1,3,5,7,9 = green, 0,2,4,6,8 = red)
+      var greenCount1 = matchedNumbers1.filter(num => [1,3,5,7,9].includes(num)).length;
+      var redCount1 = matchedNumbers1.filter(num => [0,2,4,6,8].includes(num)).length;
+      var colorPrediction1 = greenCount1 > redCount1 ? "GREEN" : redCount1 > greenCount1 ? "RED" : "??";
+
+      var greenCount2 = matchedNumbers2.filter(num => [1,3,5,7,9].includes(num)).length;
+      var redCount2 = matchedNumbers2.filter(num => [0,2,4,6,8].includes(num)).length;
+      var colorPrediction2 = greenCount2 > redCount2 ? "GREEN" : redCount2 > greenCount2 ? "RED" : "??";
+
+      var greenCount3 = matchedNumbers3.filter(num => [1,3,5,7,9].includes(num)).length;
+      var redCount3 = matchedNumbers3.filter(num => [0,2,4,6,8].includes(num)).length;
+      var colorPrediction3 = greenCount3 > redCount3 ? "GREEN" : redCount3 > greenCount3 ? "RED" : "??";
+      
+      var greenCount4 = matchedNumbers4.filter(num => [1,3,5,7,9].includes(num)).length;
+      var redCount4 = matchedNumbers4.filter(num => [0,2,4,6,8].includes(num)).length;
+      var colorPrediction4 = greenCount4 > redCount4 ? "GREEN" : redCount4 > greenCount4 ? "RED" : "??";
+
+      // Calculate size predictions (5-9 = BIG, 0-4 = SMALL)
       var countB1 = matchedNumbers1.filter(num => num >= 5 && num <= 9).length;
       var countS1 = matchedNumbers1.filter(num => num >= 0 && num <= 4).length;
       var prediction1 = countB1 > countS1 ? "BIG" : countS1 > countB1 ? "SMALL" : "??";
@@ -486,87 +503,126 @@
       var countS4 = matchedNumbers4.filter(num => num >= 0 && num <= 4).length;
       var prediction4 = countB4 > countS4 ? "BIG" : countS4 > countB4 ? "SMALL" : "??";
 
-      const predictions = [prediction1, prediction2, prediction3, prediction4].filter(p => p !== "??");
+      const colorPredictions = [colorPrediction1, colorPrediction2, colorPrediction3, colorPrediction4].filter(p => p !== "??");
+      const sizePredictions = [prediction1, prediction2, prediction3, prediction4].filter(p => p !== "??");
       
-      // Calculate confidence percentage (minimum 50%)
-      const totalPredictions = predictions.length;
-      const samePredictions = predictions.filter(p => p === prediction1).length;
-      let confidencePercentage = Math.max(50, Math.round((samePredictions / totalPredictions) * 100));
+      // Calculate confidence percentages
+      const totalColorPredictions = colorPredictions.length;
+      const sameColorPredictions = colorPredictions.filter(p => p === colorPrediction1).length;
+      let colorConfidence = Math.max(50, Math.round((sameColorPredictions / totalColorPredictions) * 100));
+      
+      const totalSizePredictions = sizePredictions.length;
+      const sameSizePredictions = sizePredictions.filter(p => p === prediction1).length;
+      let sizeConfidence = Math.max(50, Math.round((sameSizePredictions / totalSizePredictions) * 100));
+      
+      // Decide which prediction to show (color or size) based on which has higher confidence
+      let showColorPrediction = false;
+      let finalPrediction = "??";
+      let finalConfidence = 50;
+      
+      if (colorConfidence > sizeConfidence) {
+        showColorPrediction = true;
+        finalPrediction = colorPrediction1;
+        finalConfidence = colorConfidence;
+      } else {
+        showColorPrediction = false;
+        finalPrediction = prediction1;
+        finalConfidence = sizeConfidence;
+      }
       
       // Case 1: All 4 databases agree - 98% (Black tick with green check)
-      if (prediction1 === prediction2 && prediction2 === prediction3 && prediction3 === prediction4 && prediction1 !== "??") {
-        resultBox.innerText = prediction1;
-        resultBox.style.color = "#1dd1a1";
-        resultBox.style.borderColor = "#1dd1a1";
-        resultBox.style.boxShadow = "0 0 8px rgba(29,209,161,0.5)";
+      if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction2 === colorPrediction3 && colorPrediction3 === colorPrediction4 && colorPrediction1 !== "??") ||
+          (!showColorPrediction && prediction1 === prediction2 && prediction2 === prediction3 && prediction3 === prediction4 && prediction1 !== "??")) {
+        resultBox.innerText = finalPrediction;
+        resultBox.style.color = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.borderColor = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.boxShadow = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
+          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
+        
         const tickMark = document.createElement('div');
         tickMark.className = 'tick-mark';
         tickMark.innerHTML = '✓';
         resultBox.appendChild(tickMark);
+        
         const badge = document.createElement('div');
         badge.className = 'percentage-badge';
         badge.innerHTML = '98%';
         resultBox.appendChild(badge);
-        confidencePercentage = 98;
+        finalConfidence = 98;
       } 
       // Case 2: First 3 databases agree - 95% (Blue tick)
-      else if (prediction1 === prediction2 && prediction2 === prediction3 && prediction1 !== "??") {
-        resultBox.innerText = prediction1;
-        resultBox.style.color = "#2e86de";
-        resultBox.style.borderColor = "#2e86de";
-        resultBox.style.boxShadow = "0 0 8px rgba(46,134,222,0.5)";
+      else if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction2 === colorPrediction3 && colorPrediction1 !== "??") ||
+               (!showColorPrediction && prediction1 === prediction2 && prediction2 === prediction3 && prediction1 !== "??")) {
+        resultBox.innerText = finalPrediction;
+        resultBox.style.color = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.borderColor = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.boxShadow = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
+          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
+        
         const blueTick = document.createElement('div');
         blueTick.className = 'blue-tick';
         blueTick.innerHTML = '✓';
         resultBox.appendChild(blueTick);
+        
         const badge = document.createElement('div');
         badge.className = 'percentage-badge';
         badge.innerHTML = '95%';
         resultBox.appendChild(badge);
-        confidencePercentage = 95;
+        finalConfidence = 95;
       }
       // Case 3: First 2 databases agree - 85% (Fire icon)
-      else if (prediction1 === prediction2 && prediction1 !== "??") {
-        resultBox.innerText = prediction1;
-        resultBox.style.color = "#ff6b6b";
-        resultBox.style.borderColor = "#ff6b6b";
-        resultBox.style.boxShadow = "0 0 8px rgba(255,107,107,0.5)";
+      else if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction1 !== "??") ||
+               (!showColorPrediction && prediction1 === prediction2 && prediction1 !== "??")) {
+        resultBox.innerText = finalPrediction;
+        resultBox.style.color = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.borderColor = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.boxShadow = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
+          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
+        
         const highChance = document.createElement('div');
         highChance.className = 'high-chance';
         highChance.innerHTML = '🔥';
         resultBox.appendChild(highChance);
+        
         const badge = document.createElement('div');
         badge.className = 'percentage-badge';
         badge.innerHTML = '85%';
         resultBox.appendChild(badge);
-        confidencePercentage = 85;
+        finalConfidence = 85;
       }
-      // Default case: Show most common prediction with calculated percentage
+      // Default case: Show prediction with calculated percentage
       else {
-        const predictionCounts = {};
-        predictions.forEach(p => {
-          predictionCounts[p] = (predictionCounts[p] || 0) + 1;
-        });
-        
-        let mostCommonPrediction = "??";
-        let maxCount = 0;
-        for (const [pred, count] of Object.entries(predictionCounts)) {
-          if (count > maxCount) {
-            mostCommonPrediction = pred;
-            maxCount = count;
-          }
-        }
-        
-        resultBox.innerText = mostCommonPrediction;
-        resultBox.style.color = "#ff9f43";
-        resultBox.style.borderColor = "#ff9f43";
-        resultBox.style.boxShadow = "0 0 8px rgba(255,159,67,0.5)";
+        resultBox.innerText = finalPrediction;
+        resultBox.style.color = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.borderColor = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
+          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
+        resultBox.style.boxShadow = showColorPrediction ? 
+          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
+          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
         
         // Add percentage badge for default case (minimum 50%)
-        if (mostCommonPrediction !== "??") {
+        if (finalPrediction !== "??") {
           const badge = document.createElement('div');
           badge.className = 'percentage-badge';
-          badge.innerHTML = confidencePercentage + '%';
+          badge.innerHTML = finalConfidence + '%';
           resultBox.appendChild(badge);
         }
       }
@@ -654,5 +710,4 @@
     }
   </script>
 </body>
-
 </html>
