@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html> -->
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
@@ -409,8 +409,9 @@
         groupedData4.push(dataset4.slice(i,i + 7));
       }
 
+      // পরিবর্তিত অংশ: নম্বর সার্চের অর্ডার উল্টো হবে (4,3,2,1)
       var searchValues = [];
-      for (var i = 1; i <= 4; i++) {
+      for (var i = 4; i >= 1; i--) {
         var val = document.getElementById("input" + i).value.trim();
         if (val !== '') {
           searchValues.push(parseInt(val));
