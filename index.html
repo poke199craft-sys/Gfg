@@ -29,6 +29,47 @@
       box-shadow: 0 0 15px rgba(106,13,173,0.5);
       z-index: 2;
       position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .minimized {
+      max-width: 200px;
+      padding: 8px;
+    }
+    
+    .minimize-btn {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background: transparent;
+      border: none;
+      color: #9c88ff;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .minimized-controls {
+      display: none;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      z-index: 10;
+    }
+    
+    .minimized .minimized-controls {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .minimized-controls button {
+      background: rgba(0,0,0,0.7);
+      border: 1px solid #6a0dad;
+      color: #fff;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 5px;
     }
     
     .status-container {
@@ -37,6 +78,11 @@
       gap: 10px;
       margin-bottom: 15px;
       position: relative;
+    }
+    
+    .minimized .status-container {
+      flex-direction: column;
+      gap: 5px;
     }
     
     .timer-box {
@@ -52,6 +98,12 @@
       min-width: 100px;
     }
     
+    .minimized .timer-box {
+      font-size: 1rem;
+      padding: 5px;
+      min-width: 60px;
+    }
+    
     .prediction-box {
       display: inline-block;
       font-size: 1.5rem;
@@ -65,6 +117,12 @@
       min-width: 100px;
       position: relative;
       transition: all 0.3s ease;
+    }
+    
+    .minimized .prediction-box {
+      font-size: 1rem;
+      padding: 5px;
+      min-width: 60px;
     }
     
     .number-box {
@@ -83,6 +141,12 @@
       justify-content: center;
       margin-left: 5px;
       overflow: hidden;
+    }
+    
+    .minimized .number-box {
+      width: 30px;
+      height: 30px;
+      margin-left: 0;
     }
     
     .number-image {
@@ -106,6 +170,14 @@
       animation: pulse 1s infinite;
     }
     
+    .minimized .high-chance {
+      top: -10px;
+      right: -10px;
+      width: 20px;
+      height: 20px;
+      font-size: 0.8rem;
+    }
+    
     .tick-mark {
       position: absolute;
       top: -15px;
@@ -123,6 +195,14 @@
       animation: pulse 1s infinite;
     }
     
+    .minimized .tick-mark {
+      top: -10px;
+      left: -10px;
+      width: 20px;
+      height: 20px;
+      font-size: 0.8rem;
+    }
+    
     .blue-tick {
       position: absolute;
       top: -15px;
@@ -138,6 +218,14 @@
       animation: pulse 1s infinite;
     }
     
+    .minimized .blue-tick {
+      top: -10px;
+      left: -10px;
+      width: 20px;
+      height: 20px;
+      font-size: 0.8rem;
+    }
+    
     .percentage-badge {
       position: absolute;
       bottom: -10px;
@@ -151,6 +239,13 @@
       justify-content: center;
     }
     
+    .minimized .percentage-badge {
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      bottom: -7px;
+      right: -7px;
+    }
+    
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.2); }
@@ -162,6 +257,10 @@
       justify-content: center;
       gap: 8px;
       margin-bottom: 15px;
+    }
+    
+    .minimized .input-row {
+      display: none;
     }
     
     .number-input {
@@ -200,15 +299,27 @@
       color: #1dd1a1;
     }
     
+    .minimized .system-status {
+      display: none;
+    }
+    
     .db-status {
       font-size: 12px;
       margin-top: 10px;
       color: #00ffcc;
     }
     
+    .minimized .db-status {
+      display: none;
+    }
+    
     .telegram-link {
       margin-top: 15px;
       font-size: 14px;
+    }
+    
+    .minimized .telegram-link {
+      display: none;
     }
     
     .telegram-link a {
@@ -225,10 +336,43 @@
       opacity: 0;
       pointer-events: none;
     }
+    
+    .voice-controls {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .minimized .voice-controls {
+      display: none;
+    }
+    
+    .voice-btn {
+      background: rgba(106, 13, 173, 0.3);
+      border: 1px solid #6a0dad;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .voice-btn.active {
+      background: rgba(106, 13, 173, 0.8);
+      box-shadow: 0 0 8px rgba(106, 13, 173, 0.5);
+    }
   </style>
 </head>
 <body>
-  <div class="main-box">
+  <div class="main-box" id="mainBox">
+    <button class="minimize-btn" id="minimizeBtn">−</button>
+    <div class="minimized-controls">
+      <button id="moveLeftBtn">←</button>
+      <button id="moveRightBtn">→</button>
+      <button id="maximizeBtn">+</button>
+    </div>
+    
     <div class="system-status" id="systemStatus">SYSTEM: ACTIVE</div>
     
     <div class="status-container">
@@ -243,6 +387,13 @@
       <input type="number" id="input2" class="number-input" placeholder="2">
       <input type="number" id="input3" class="number-input" placeholder="3">
       <input type="number" id="input4" class="number-input" placeholder="4">
+    </div>
+    
+    <div class="voice-controls">
+      <button class="voice-btn" id="voiceResultBtn">🔊 Result</button>
+      <button class="voice-btn" id="voiceNumberBtn">🔊 Number</button>
+      <button class="voice-btn" id="voiceColorBtn">🔊 Color</button>
+      <button class="voice-btn" id="voiceSizeBtn">🔊 Size</button>
     </div>
     
     <div class="db-status">
@@ -262,15 +413,15 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 
   <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
-            authDomain: "nagydbushklams.firebaseapp.com",
-            databaseURL: "https://nagydbushklams-default-rtdb.firebaseio.com",
-            projectId: "nagydbushklams",
-            storageBucket: "nagydbushklams.firebasestorage.app",
-            messagingSenderId: "676867467001",
-            appId: "676867467001:web:119605015d28a9b9cf2428"
-        };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
+      authDomain: "nagydbushklams.firebaseapp.com",
+      databaseURL: "https://nagydbushklams-default-rtdb.firebaseio.com",
+      projectId: "nagydbushklams",
+      storageBucket: "nagydbushklams.firebasestorage.app",
+      messagingSenderId: "676867467001",
+      appId: "676867467001:web:119605015d28a9b9cf2428"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
@@ -287,6 +438,100 @@
     var timerInterval;
     var hiddenTimeElement = document.getElementById('hiddenTime');
     var dataset1 = [], dataset2 = [], dataset3 = [], dataset4 = [];
+    var minimized = false;
+    var currentPrediction = "";
+    var currentNumber = "";
+    var currentColor = "";
+    var currentSize = "";
+
+    // Minimize functionality
+    document.getElementById('minimizeBtn').addEventListener('click', minimizeWindow);
+    document.getElementById('maximizeBtn').addEventListener('click', maximizeWindow);
+    document.getElementById('moveLeftBtn').addEventListener('click', () => moveWindow(-10, 0));
+    document.getElementById('moveRightBtn').addEventListener('click', () => moveWindow(10, 0));
+
+    function minimizeWindow() {
+      const mainBox = document.getElementById('mainBox');
+      mainBox.classList.add('minimized');
+      minimized = true;
+    }
+
+    function maximizeWindow() {
+      const mainBox = document.getElementById('mainBox');
+      mainBox.classList.remove('minimized');
+      minimized = false;
+      // Reset position
+      mainBox.style.position = '';
+      mainBox.style.top = '';
+      mainBox.style.left = '';
+    }
+
+    function moveWindow(xOffset, yOffset) {
+      const mainBox = document.getElementById('mainBox');
+      
+      // Initialize position if not set
+      if (!mainBox.style.position || mainBox.style.position === 'static') {
+        mainBox.style.position = 'fixed';
+        mainBox.style.top = '50px';
+        mainBox.style.left = '50px';
+      }
+      
+      // Get current position
+      let top = parseInt(mainBox.style.top) || 50;
+      let left = parseInt(mainBox.style.left) || 50;
+      
+      // Update position
+      mainBox.style.top = (top + yOffset) + 'px';
+      mainBox.style.left = (left + xOffset) + 'px';
+    }
+
+    // Voice announcement functionality
+    document.getElementById('voiceResultBtn').addEventListener('click', announceResult);
+    document.getElementById('voiceNumberBtn').addEventListener('click', announceNumber);
+    document.getElementById('voiceColorBtn').addEventListener('click', announceColor);
+    document.getElementById('voiceSizeBtn').addEventListener('click', announceSize);
+
+    function speakText(text, rate = 1.0) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = rate;
+        window.speechSynthesis.cancel(); // Cancel any ongoing speech
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function announceResult() {
+      if (currentPrediction) {
+        speakText(`Prediction result is ${currentPrediction}`);
+      } else {
+        speakText("No prediction available yet");
+      }
+    }
+
+    function announceNumber() {
+      if (currentNumber) {
+        speakText(`Predicted number is ${currentNumber}`);
+      } else {
+        speakText("No number prediction available yet");
+      }
+    }
+
+    function announceColor() {
+      if (currentColor) {
+        speakText(`Color prediction is ${currentColor}`);
+      } else {
+        speakText("No color prediction available yet");
+      }
+    }
+
+    function announceSize() {
+      if (currentSize) {
+        speakText(`Size prediction is ${currentSize}`);
+      } else {
+        speakText("No size prediction available yet");
+      }
+    }
 
     // Check admin settings on load
     adminSettingsRef.on('value', (snapshot) => {
@@ -392,6 +637,12 @@
       document.getElementById("number-box").innerHTML = "";
       const indicators = document.querySelectorAll('.high-chance,.tick-mark,.percentage-badge,.blue-tick');
       indicators.forEach(ind => ind.remove());
+      
+      // Reset current values
+      currentPrediction = "";
+      currentNumber = "";
+      currentColor = "";
+      currentSize = "";
     }
 
     function updateNumberBox(number) {
@@ -500,6 +751,7 @@
       
       // Update number box with most frequent number from first database
       updateNumberBox(mostFrequentNumber);
+      currentNumber = mostFrequentNumber;
 
       // Calculate color predictions (1,3,5,7,9 = green, 0,2,4,6,8 = red)
       var greenCount1 = matchedNumbers1.filter(num => [1,3,5,7,9].includes(num)).length;
@@ -556,11 +808,17 @@
         showColorPrediction = true;
         finalPrediction = colorPrediction1;
         finalConfidence = colorConfidence;
+        currentColor = finalPrediction;
+        currentSize = "";
       } else {
         showColorPrediction = false;
         finalPrediction = prediction1;
         finalConfidence = sizeConfidence;
+        currentSize = finalPrediction;
+        currentColor = "";
       }
+      
+      currentPrediction = finalPrediction;
       
       // Case 1: All 4 databases agree - 98% (Black tick with green check)
       if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction2 === colorPrediction3 && colorPrediction3 === colorPrediction4 && colorPrediction1 !== "??") ||
