@@ -50,6 +50,7 @@
       box-shadow: 0 0 8px #00ffcc;
       font-weight: bold;
       min-width: 100px;
+      cursor: pointer;
     }
     
     .prediction-box {
@@ -225,7 +226,72 @@
       opacity: 0;
       pointer-events: none;
     }
+    
+    /* Floating Minimize Button */
+    .floating-minimize {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: #6a0dad;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 0 15px rgba(106, 13, 173, 0.7);
+      transition: all 0.3s ease;
+    }
+    
+    .floating-minimize:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(106, 13, 173, 0.9);
+    }
+    
+    .floating-minimize i {
+      color: white;
+      font-size: 24px;
+    }
+    
+    /* Mini Window */
+    .mini-window {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: rgba(106, 13, 173, 0.8);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 0 15px rgba(106, 13, 173, 0.7);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .mini-window:hover {
+      transform: scale(1.1);
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .market-indicator {
+      font-size: 10px;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #00ffcc;
+    }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="main-box">
@@ -258,19 +324,29 @@
     <iframe src="https://www.amarclub1.com/#/register?invitationCode=58473937685" frameborder="0" allowfullscreen></iframe>
   </div>
 
+  <!-- Floating Minimize Button -->
+  <div class="floating-minimize" id="floatingMinimize">
+    <i class="fas fa-window-minimize"></i>
+  </div>
+  
+  <!-- Mini Window -->
+  <div class="mini-window" id="miniWindow">
+    <i class="fas fa-expand"></i>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 
   <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
-            authDomain: "nagydbushklams.firebaseapp.com",
-            databaseURL: "https://nagydbushklams-default-rtdb.firebaseio.com",
-            projectId: "nagydbushklams",
-            storageBucket: "nagydbushklams.firebasestorage.app",
-            messagingSenderId: "676867467001",
-            appId: "676867467001:web:119605015d28a9b9cf2428"
-        };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
+      authDomain: "nagydbushklams.firebaseapp.com",
+      databaseURL: "https://nagydbushklams-default-rtdb.firebaseio.com",
+      projectId: "nagydbushklams",
+      storageBucket: "nagydbushklams.firebasestorage.app",
+      messagingSenderId: "676867467001",
+      appId: "676867467001:web:119605015d28a9b9cf2428"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
@@ -287,6 +363,13 @@
     var timerInterval;
     var hiddenTimeElement = document.getElementById('hiddenTime');
     var dataset1 = [], dataset2 = [], dataset3 = [], dataset4 = [];
+    var is60SecondMode = false; // Track if we're in 60-second mode
+    var marketIndicator = document.createElement('div');
+
+    // Create market indicator
+    marketIndicator.className = 'market-indicator';
+    marketIndicator.innerHTML = '30s';
+    document.getElementById('timer').appendChild(marketIndicator);
 
     // Check admin settings on load
     adminSettingsRef.on('value', (snapshot) => {
@@ -310,6 +393,25 @@
           document.getElementById('telegramLinkContainer').style.display = 'block';
           document.getElementById('telegramLink').href = telegramLink;
         }
+      }
+    });
+
+    // Timer box click handler to toggle between 30s and 60s modes
+    document.getElementById('timer').addEventListener('click', function() {
+      is60SecondMode = !is60SecondMode;
+      
+      if (is60SecondMode) {
+        // Switch to 60-second mode
+        marketIndicator.innerHTML = '60s';
+        clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+      } else {
+        // Switch back to 30-second mode
+        marketIndicator.innerHTML = '30s';
+        clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
       }
     });
 
@@ -343,7 +445,15 @@
       
       const now = new Date();
       const seconds = now.getSeconds();
-      const remainingSeconds = 30 - (seconds % 30);
+      
+      let remainingSeconds;
+      if (is60SecondMode) {
+        // 60-second mode logic
+        remainingSeconds = 60 - (seconds % 60);
+      } else {
+        // 30-second mode logic
+        remainingSeconds = 30 - (seconds % 30);
+      }
       
       // Update visible timer
       document.getElementById("timer").innerText = `00:${String(remainingSeconds).padStart(2,'0')}`;
@@ -351,8 +461,10 @@
       // Update hidden time element with full timestamp
       hiddenTimeElement.textContent = now.getTime();
       
-      // Check if it's time to fetch new numbers (at 30 seconds)
-      if (remainingSeconds === 30) {
+      // Check if it's time to fetch new numbers
+      if (is60SecondMode && remainingSeconds === 60) {
+        fetchCurrentNumbers60s();
+      } else if (!is60SecondMode && remainingSeconds === 30) {
         fetchCurrentNumbers();
       } 
       // Clear inputs when timer reaches 1 second
@@ -366,6 +478,29 @@
       
       try {
         const res = await fetch('https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts=' + Date.now());
+        const data = await res.json();
+        
+        const latestNumbers = data.data.list.slice(0,4).map(item => {
+          const num = parseInt(item.number);
+          return isNaN(num) ? '' : num;
+        });
+        
+        for (let i = 0; i < 4; i++) {
+          const inputElement = document.getElementById(`input${i+1}`);
+          inputElement.value = latestNumbers[i] !== undefined ? latestNumbers[i] : '';
+        }
+
+        processData();
+      } catch (error) {
+        console.error("Fetch error:",error);
+      }
+    }
+
+    async function fetchCurrentNumbers60s() {
+      if (!systemActive) return;
+      
+      try {
+        const res = await fetch('https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?ts=' + Date.now());
         const data = await res.json();
         
         const latestNumbers = data.data.list.slice(0,4).map(item => {
@@ -660,6 +795,26 @@
       }
     }
 
+    // Floating minimize button functionality
+    document.getElementById('floatingMinimize').addEventListener('click', function() {
+      // Hide the main content
+      document.querySelector('.main-box').style.display = 'none';
+      // Hide the minimize button
+      this.style.display = 'none';
+      // Show the mini window
+      document.getElementById('miniWindow').style.display = 'flex';
+    });
+
+    // Mini window click to restore functionality
+    document.getElementById('miniWindow').addEventListener('click', function() {
+      // Show the main content
+      document.querySelector('.main-box').style.display = 'block';
+      // Show the minimize button
+      document.getElementById('floatingMinimize').style.display = 'flex';
+      // Hide the mini window
+      this.style.display = 'none';
+    });
+
     document.addEventListener('DOMContentLoaded',() => {
       systemStatusRef.on('value',(snapshot) => {
         systemActive = snapshot.val() !== false;
@@ -742,6 +897,4 @@
     }
   </script>
 </body>
-</html>  
-
-
+</html>
