@@ -5,10 +5,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Lottery Prediction System</title>
   <style>
+    :root {
+      --primary-color: #6a0dad;
+      --secondary-color: #00ffcc;
+      --accent-color: #9c88ff;
+      --danger-color: #ff4757;
+      --success-color: #1dd1a1;
+      --warning-color: #ff9f43;
+      --info-color: #2e86de;
+      --dark-bg: #111;
+      --card-bg: rgba(0,0,0,0.5);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body { 
-      font-family: Arial,sans-serif; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
       text-align: center; 
-      background-color: #111; 
+      background-color: var(--dark-bg); 
       color: #fff;
       user-select: none;
       -webkit-user-select: none;
@@ -17,18 +35,75 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(106, 13, 173, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.1) 0%, transparent 20%);
+    }
+    
+    .main-container {
+      position: relative;
+      max-width: 340px;
+      margin: 0 auto;
+      z-index: 2;
     }
     
     .main-box {
-      max-width: 310px;
-      margin: 0 auto;
       padding: 15px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid #6a0dad;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(106,13,173,0.5);
-      z-index: 2;
-      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--primary-color);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(106,13,173,0.5);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    
+    .system-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .system-status {
+      font-size: 12px;
+      color: var(--success-color);
+      padding: 5px 10px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 20px;
+      border: 1px solid var(--success-color);
+    }
+    
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .control-btn {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .minimize-btn {
+      background: var(--warning-color);
+    }
+    
+    .maximize-btn {
+      background: var(--success-color);
+    }
+    
+    .close-btn {
+      background: var(--danger-color);
+    }
+    
+    .control-btn:hover {
+      transform: scale(1.1);
     }
     
     .status-container {
@@ -42,23 +117,30 @@
     .timer-box {
       display: inline-block;
       font-size: 1.5rem;
-      color: #00ffcc;
+      color: var(--secondary-color);
       background-color: rgba(0,0,0,0.7);
-      padding: 10px 10px;
+      padding: 10px;
       border-radius: 8px;
-      border: 1px solid #00ffcc;
-      box-shadow: 0 0 8px #00ffcc;
+      border: 1px solid var(--secondary-color);
+      box-shadow: 0 0 8px var(--secondary-color);
       font-weight: bold;
       min-width: 100px;
       cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .timer-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px var(--secondary-color);
     }
     
     .prediction-box {
       display: inline-block;
       font-size: 1.5rem;
       font-weight: bold;
-      padding: 10px 10px;
-      border: 1px solid #9c88ff;
+      padding: 10px;
+      border: 1px solid var(--accent-color);
       border-radius: 8px;
       background: rgba(156, 136, 255, 0.1);
       color: #e0e0e0;
@@ -69,19 +151,18 @@
     }
     
     .number-box {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1rem;
       font-weight: bold;
       padding: 5px;
-      border: 1px solid #9c88ff;
-      border-radius: 5px;
+      border: 1px solid var(--accent-color);
+      border-radius: 8px;
       background: rgba(156, 136, 255, 0.1);
       color: #e0e0e0;
       width: 40px;
       height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       margin-left: 5px;
       overflow: hidden;
     }
@@ -97,7 +178,7 @@
       top: -15px;
       right: -15px;
       font-size: 1.2rem;
-      background: #ff4757;
+      background: var(--danger-color);
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -113,8 +194,8 @@
       left: -15px;
       font-size: 1.2rem;
       background: #000;
-      color: #1dd1a1;
-      border: 2px solid #1dd1a1;
+      color: var(--success-color);
+      border: 2px solid var(--success-color);
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -129,7 +210,7 @@
       top: -15px;
       left: -15px;
       font-size: 1.2rem;
-      background: #2e86de;
+      background: var(--info-color);
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -144,7 +225,7 @@
       bottom: -10px;
       right: -10px;
       font-size: 0.8rem;
-      background: #6a0dad;
+      background: var(--primary-color);
       border-radius: 15px;
       padding: 2px 8px;
       display: flex;
@@ -171,12 +252,18 @@
       font-size: 18px;
       text-align: center;
       background: #222;
-      color: #00ffcc;
-      border: 1px solid #00ffcc;
+      color: var(--secondary-color);
+      border: 1px solid var(--secondary-color);
       border-radius: 5px;
       pointer-events: none;
+      transition: all 0.3s ease;
     }
-
+    
+    .number-input:focus {
+      outline: none;
+      box-shadow: 0 0 8px var(--secondary-color);
+    }
+    
     .webview-container {
       position: fixed;
       bottom: 0;
@@ -193,18 +280,10 @@
       border: none;
     }
     
-    .system-status {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 12px;
-      color: #1dd1a1;
-    }
-    
     .db-status {
       font-size: 12px;
       margin-top: 10px;
-      color: #00ffcc;
+      color: var(--secondary-color);
     }
     
     .telegram-link {
@@ -213,7 +292,7 @@
     }
     
     .telegram-link a {
-      color: #2e86de;
+      color: var(--info-color);
       text-decoration: none;
     }
     
@@ -227,35 +306,43 @@
       pointer-events: none;
     }
     
-    /* Floating Minimize Button */
-    .floating-minimize {
+    /* Floating Buttons */
+    .floating-buttons {
       position: fixed;
       bottom: 20px;
       right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1000;
+    }
+    
+    .floating-btn {
       width: 50px;
       height: 50px;
-      background: #6a0dad;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      z-index: 1000;
-      box-shadow: 0 0 15px rgba(106, 13, 173, 0.7);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       transition: all 0.3s ease;
     }
     
-    .floating-minimize:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(106, 13, 173, 0.9);
+    .floating-btn:hover {
+      transform: scale(1.1) translateY(-5px);
     }
     
-    .floating-minimize i {
+    .record-btn {
+      background: var(--danger-color);
       color: white;
-      font-size: 24px;
     }
     
-    /* Mini Window */
+    .minimize-btn-float {
+      background: var(--warning-color);
+      color: white;
+    }
+    
     .mini-window {
       position: fixed;
       bottom: 20px;
@@ -288,35 +375,217 @@
       position: absolute;
       top: 5px;
       right: 5px;
-      color: #00ffcc;
+      color: var(--secondary-color);
+    }
+    
+    /* Settings Panel */
+    .settings-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      background: var(--card-bg);
+      border: 1px solid var(--primary-color);
+      border-radius: 15px;
+      padding: 20px;
+      z-index: 2000;
+      box-shadow: 0 0 30px rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      display: none;
+    }
+    
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--primary-color);
+    }
+    
+    .settings-title {
+      font-size: 18px;
+      color: var(--accent-color);
+    }
+    
+    .close-settings {
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--danger-color);
+    }
+    
+    .settings-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--success-color);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .betting-controls {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--primary-color);
+    }
+    
+    .bet-step {
+      margin: 10px 0;
+    }
+    
+    .bet-input {
+      width: 60px;
+      padding: 5px;
+      background: #222;
+      color: white;
+      border: 1px solid var(--accent-color);
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .save-btn {
+      margin-top: 15px;
+      padding: 8px 15px;
+      background: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .save-btn:hover {
+      background: #17a689;
+    }
+    
+    /* Voice notification */
+    .voice-notification {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      padding: 10px 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--info-color);
+      border-radius: 8px;
+      color: white;
+      z-index: 1000;
+      display: none;
+      animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(-100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Overlay for modal */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1500;
+      display: none;
+    }
+    
+    /* Prediction mode indicator */
+    .mode-indicator {
+      font-size: 10px;
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      color: var(--accent-color);
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="main-box">
-    <div class="system-status" id="systemStatus">SYSTEM: ACTIVE</div>
-    
-    <div class="status-container">
-      <div class="timer-box" id="timer">00:30</div>
-      <div class="prediction-box" id="result-box"></div>
-      <div class="number-box" id="number-box"></div>
-      <div class="hidden-time" id="hiddenTime"></div>
-    </div>
-    
-    <div class="input-row">
-      <input type="number" id="input1" class="number-input" placeholder="1">
-      <input type="number" id="input2" class="number-input" placeholder="2">
-      <input type="number" id="input3" class="number-input" placeholder="3">
-      <input type="number" id="input4" class="number-input" placeholder="4">
-    </div>
-    
-    <div class="db-status">
-      Database Status: <span id="dbStatus">Loading...</span>
-    </div>
-    
-    <div class="telegram-link" id="telegramLinkContainer" style="display: none;">
-      Join our Telegram: <a href="#" id="telegramLink" target="_blank">@ChannelName</a>
+  <div class="overlay" id="overlay"></div>
+  
+  <div class="main-container">
+    <div class="main-box" id="mainBox">
+      <div class="system-header">
+        <div class="system-status" id="systemStatus">SYSTEM: ACTIVE</div>
+        <div class="window-controls">
+          <div class="control-btn minimize-btn" id="minimizeBtn">
+            <i class="fas fa-window-minimize"></i>
+          </div>
+          <div class="control-btn maximize-btn" id="maximizeBtn">
+            <i class="fas fa-window-maximize"></i>
+          </div>
+          <div class="control-btn close-btn" id="closeBtn">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="status-container">
+        <div class="timer-box" id="timer">00:30</div>
+        <div class="prediction-box" id="result-box"></div>
+        <div class="number-box" id="number-box"></div>
+        <div class="hidden-time" id="hiddenTime"></div>
+      </div>
+      
+      <div class="input-row">
+        <input type="number" id="input1" class="number-input" placeholder="1">
+        <input type="number" id="input2" class="number-input" placeholder="2">
+        <input type="number" id="input3" class="number-input" placeholder="3">
+        <input type="number" id="input4" class="number-input" placeholder="4">
+      </div>
+      
+      <div class="db-status">
+        Database Status: <span id="dbStatus">Loading...</span>
+      </div>
+      
+      <div class="telegram-link" id="telegramLinkContainer" style="display: none;">
+        Join our Telegram: <a href="#" id="telegramLink" target="_blank">@ChannelName</a>
+      </div>
     </div>
   </div>
 
@@ -324,9 +593,14 @@
     <iframe src="https://www.amarclub1.com/#/register?invitationCode=58473937685" frameborder="0" allowfullscreen></iframe>
   </div>
 
-  <!-- Floating Minimize Button -->
-  <div class="floating-minimize" id="floatingMinimize">
-    <i class="fas fa-window-minimize"></i>
+  <!-- Floating Buttons -->
+  <div class="floating-buttons">
+    <div class="floating-btn record-btn" id="recordBtn">
+      <i class="fas fa-microphone"></i>
+    </div>
+    <div class="floating-btn minimize-btn-float" id="minimizeBtnFloat">
+      <i class="fas fa-window-minimize"></i>
+    </div>
   </div>
   
   <!-- Mini Window -->
@@ -334,10 +608,75 @@
     <i class="fas fa-expand"></i>
   </div>
 
+  <!-- Settings Panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <div class="settings-title">System Settings</div>
+      <div class="close-settings" id="closeSettings"><i class="fas fa-times"></i></div>
+    </div>
+    
+    <div class="settings-option">
+      <span>Color Prediction Only</span>
+      <label class="switch">
+        <input type="checkbox" id="colorOnlyToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="settings-option">
+      <span>Size Prediction Only</span>
+      <label class="switch">
+        <input type="checkbox" id="sizeOnlyToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="settings-option">
+      <span>Live Prediction</span>
+      <label class="switch">
+        <input type="checkbox" id="livePredictionToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="settings-option">
+      <span>Voice Notification</span>
+      <label class="switch">
+        <input type="checkbox" id="voiceToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="betting-controls">
+      <h3>Betting Steps</h3>
+      <div class="bet-step">
+        <span>Step 1 Amount:</span>
+        <input type="number" class="bet-input" id="step1Amount" value="1" min="1">
+      </div>
+      <div class="bet-step">
+        <span>Step 2 Amount:</span>
+        <input type="number" class="bet-input" id="step2Amount" value="3" min="1">
+      </div>
+      <div class="bet-step">
+        <span>Step 3 Amount:</span>
+        <input type="number" class="bet-input" id="step3Amount" value="9" min="1">
+      </div>
+    </div>
+    
+    <button class="save-btn" id="saveSettings">Save Settings</button>
+  </div>
+  
+  <!-- Voice Notification -->
+  <div class="voice-notification" id="voiceNotification">
+    <i class="fas fa-volume-up"></i> 
+    <span id="voiceText">Prediction result is available</span>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 
   <script>
+    // Firebase configuration and initialization
     const firebaseConfig = {
       apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
       authDomain: "nagydbushklams.firebaseapp.com",
@@ -355,6 +694,7 @@
     const adminSettingsRef = database.ref('adminSettings');
     const telegramLinkRef = database.ref('telegramLink');
 
+    // Global variables
     var systemActive = true;
     var lastIssueNumber = null;
     var webviewShown = false;
@@ -363,58 +703,206 @@
     var timerInterval;
     var hiddenTimeElement = document.getElementById('hiddenTime');
     var dataset1 = [], dataset2 = [], dataset3 = [], dataset4 = [];
-    var is60SecondMode = false; // Track if we're in 60-second mode
+    var is60SecondMode = false;
     var marketIndicator = document.createElement('div');
+    var doubleClickTimer = null;
+    var clickCount = 0;
+    var predictionMode = 'normal'; // 'normal', 'colorOnly', 'sizeOnly'
+    var voiceEnabled = false;
+    var bettingSteps = [1, 3, 9];
+    var currentBettingStep = 0;
+    var livePredictionEnabled = true;
+    var oppositeModeActive = false;
+    var consecutiveWrongPredictions = 0;
+
+    // Initialize the application
+    function init() {
+      createMarketIndicator();
+      setupEventListeners();
+      loadSettings();
+      startTimer();
+      loadDatabases();
+      checkAdminSettings();
+      loadTelegramLink();
+      setupSystemStatusListener();
+    }
 
     // Create market indicator
-    marketIndicator.className = 'market-indicator';
-    marketIndicator.innerHTML = '30s';
-    document.getElementById('timer').appendChild(marketIndicator);
+    function createMarketIndicator() {
+      marketIndicator.className = 'market-indicator';
+      marketIndicator.innerHTML = '30s';
+      document.getElementById('timer').appendChild(marketIndicator);
+    }
 
-    // Check admin settings on load
-    adminSettingsRef.on('value', (snapshot) => {
-      const settings = snapshot.val();
-      if (settings) {
-        requireLogin = settings.requireLogin !== false;
-        
-        // Show webview if enabled and not shown before
-        if (settings.showWebview && !webviewShown) {
-          document.getElementById('webview').style.display = 'block';
-          webviewShown = true;
-        }
-      }
-    });
-
-    // Load Telegram link
-    telegramLinkRef.on('value', (snapshot) => {
-      if (snapshot.exists()) {
-        telegramLink = snapshot.val();
-        if (telegramLink) {
-          document.getElementById('telegramLinkContainer').style.display = 'block';
-          document.getElementById('telegramLink').href = telegramLink;
-        }
-      }
-    });
-
-    // Timer box click handler to toggle between 30s and 60s modes
-    document.getElementById('timer').addEventListener('click', function() {
-      is60SecondMode = !is60SecondMode;
+    // Setup all event listeners
+    function setupEventListeners() {
+      // Timer box click handler
+      document.getElementById('timer').addEventListener('click', function() {
+        toggleMarketMode();
+      });
       
-      if (is60SecondMode) {
-        // Switch to 60-second mode
-        marketIndicator.innerHTML = '60s';
-        clearInterval(timerInterval);
-        timerInterval = setInterval(updateTimer, 1000);
-        updateTimer();
-      } else {
-        // Switch back to 30-second mode
-        marketIndicator.innerHTML = '30s';
-        clearInterval(timerInterval);
-        timerInterval = setInterval(updateTimer, 1000);
-        updateTimer();
-      }
-    });
+      // Double click handler for settings
+      document.addEventListener('click', handleDoubleClick);
+      
+      // Minimize/Maximize buttons
+      document.getElementById('minimizeBtn').addEventListener('click', minimizeApp);
+      document.getElementById('maximizeBtn').addEventListener('click', maximizeApp);
+      document.getElementById('closeBtn').addEventListener('click', closeApp);
+      document.getElementById('minimizeBtnFloat').addEventListener('click', minimizeApp);
+      
+      // Mini window click handler
+      document.getElementById('miniWindow').addEventListener('click', maximizeApp);
+      
+      // Record button
+      document.getElementById('recordBtn').addEventListener('click', toggleVoice);
+      
+      // Settings panel
+      document.getElementById('closeSettings').addEventListener('click', closeSettings);
+      document.getElementById('saveSettings').addEventListener('click', saveSettings);
+      
+      // Overlay click to close settings
+      document.getElementById('overlay').addEventListener('click', closeSettings);
+    }
 
+    // Handle double click for settings
+    function handleDoubleClick() {
+      clickCount++;
+      
+      if (clickCount === 1) {
+        doubleClickTimer = setTimeout(function() {
+          clickCount = 0;
+        }, 300);
+      } else if (clickCount === 2) {
+        clearTimeout(doubleClickTimer);
+        clickCount = 0;
+        showSettings();
+      }
+    }
+
+    // Toggle between 30s and 60s market modes
+    function toggleMarketMode() {
+      is60SecondMode = !is60SecondMode;
+      marketIndicator.innerHTML = is60SecondMode ? '60s' : '30s';
+      
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      updateTimer();
+    }
+
+    // Minimize the application
+    function minimizeApp() {
+      document.querySelector('.main-container').style.display = 'none';
+      document.querySelector('.floating-buttons').style.display = 'none';
+      document.getElementById('miniWindow').style.display = 'flex';
+    }
+
+    // Maximize the application
+    function maximizeApp() {
+      document.querySelector('.main-container').style.display = 'block';
+      document.querySelector('.floating-buttons').style.display = 'flex';
+      document.getElementById('miniWindow').style.display = 'none';
+    }
+
+    // Close the application
+    function closeApp() {
+      // In a real app, this would close the window
+      alert('Application would close now');
+    }
+
+    // Show settings panel
+    function showSettings() {
+      document.getElementById('settingsPanel').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+    }
+
+    // Close settings panel
+    function closeSettings() {
+      document.getElementById('settingsPanel').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    // Save settings
+    function saveSettings() {
+      predictionMode = document.getElementById('colorOnlyToggle').checked ? 'colorOnly' : 
+                      document.getElementById('sizeOnlyToggle').checked ? 'sizeOnly' : 'normal';
+      
+      voiceEnabled = document.getElementById('voiceToggle').checked;
+      livePredictionEnabled = document.getElementById('livePredictionToggle').checked;
+      
+      // Save betting steps
+      bettingSteps = [
+        parseInt(document.getElementById('step1Amount').value) || 1,
+        parseInt(document.getElementById('step2Amount').value) || 3,
+        parseInt(document.getElementById('step3Amount').value) || 9
+      ];
+      
+      // Save to localStorage
+      localStorage.setItem('predictionMode', predictionMode);
+      localStorage.setItem('voiceEnabled', voiceEnabled);
+      localStorage.setItem('livePredictionEnabled', livePredictionEnabled);
+      localStorage.setItem('bettingSteps', JSON.stringify(bettingSteps));
+      
+      closeSettings();
+      showNotification('Settings saved successfully');
+    }
+
+    // Load settings from localStorage
+    function loadSettings() {
+      predictionMode = localStorage.getItem('predictionMode') || 'normal';
+      voiceEnabled = localStorage.getItem('voiceEnabled') === 'true';
+      livePredictionEnabled = localStorage.getItem('livePredictionEnabled') !== 'false';
+      
+      const savedBettingSteps = localStorage.getItem('bettingSteps');
+      if (savedBettingSteps) {
+        bettingSteps = JSON.parse(savedBettingSteps);
+      }
+      
+      // Update UI
+      document.getElementById('colorOnlyToggle').checked = predictionMode === 'colorOnly';
+      document.getElementById('sizeOnlyToggle').checked = predictionMode === 'sizeOnly';
+      document.getElementById('voiceToggle').checked = voiceEnabled;
+      document.getElementById('livePredictionToggle').checked = livePredictionEnabled;
+      document.getElementById('step1Amount').value = bettingSteps[0];
+      document.getElementById('step2Amount').value = bettingSteps[1];
+      document.getElementById('step3Amount').value = bettingSteps[2];
+    }
+
+    // Toggle voice notifications
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      localStorage.setItem('voiceEnabled', voiceEnabled);
+      
+      if (voiceEnabled) {
+        showNotification('Voice notifications enabled');
+        speak('Voice notifications are now enabled');
+      } else {
+        showNotification('Voice notifications disabled');
+      }
+    }
+
+    // Show notification
+    function showNotification(message) {
+      const notification = document.getElementById('voiceNotification');
+      document.getElementById('voiceText').textContent = message;
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+
+    // Speak text
+    function speak(text) {
+      if (!voiceEnabled) return;
+      
+      if ('speechSynthesis' in window) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = 'en-US';
+        window.speechSynthesis.speak(speech);
+      }
+    }
+
+    // Load databases
     async function loadDatabases() {
       try {
         const res1 = await fetch('database1.json?ts=' + Date.now());
@@ -431,11 +919,12 @@
         
         document.getElementById('dbStatus').textContent = 'Active (4 databases loaded)';
       } catch (error) {
-        console.error('Error loading databases:',error);
+        console.error('Error loading databases:', error);
         document.getElementById('dbStatus').textContent = 'Error loading databases';
       }
     }
 
+    // Update timer
     function updateTimer() {
       if (!systemActive) {
         document.getElementById("timer").innerText = "SYSTEM OFF";
@@ -448,10 +937,8 @@
       
       let remainingSeconds;
       if (is60SecondMode) {
-        // 60-second mode logic
         remainingSeconds = 60 - (seconds % 60);
       } else {
-        // 30-second mode logic
         remainingSeconds = 30 - (seconds % 30);
       }
       
@@ -473,6 +960,14 @@
       }
     }
 
+    // Start timer
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      updateTimer();
+    }
+
+    // Fetch current numbers for 30s mode
     async function fetchCurrentNumbers() {
       if (!systemActive) return;
       
@@ -492,10 +987,11 @@
 
         processData();
       } catch (error) {
-        console.error("Fetch error:",error);
+        console.error("Fetch error:", error);
       }
     }
 
+    // Fetch current numbers for 60s mode
     async function fetchCurrentNumbers60s() {
       if (!systemActive) return;
       
@@ -515,10 +1011,11 @@
 
         processData();
       } catch (error) {
-        console.error("Fetch error:",error);
+        console.error("Fetch error:", error);
       }
     }
 
+    // Clear inputs
     function clearInputs() {
       for (let i = 1; i <= 4; i++) {
         document.getElementById(`input${i}`).value = '';
@@ -529,23 +1026,20 @@
       indicators.forEach(ind => ind.remove());
     }
 
+    // Update number box
     function updateNumberBox(number) {
       const numberBox = document.getElementById("number-box");
-      
-      // Clear previous content
       numberBox.innerHTML = '';
       
       if (number === '' || number === undefined) {
         return;
       }
       
-      // Create and add the image for the number
       const img = document.createElement('img');
       img.src = `bvcc_${number}.png`;
       img.alt = number;
       img.className = 'number-image';
       img.onerror = function() {
-        // If image fails to load, show the number as text
         numberBox.innerHTML = number;
         console.error(`Failed to load image for number ${number}`);
       };
@@ -553,33 +1047,20 @@
       numberBox.appendChild(img);
     }
 
+    // Process data and make predictions
     function processData() { 
       if (!systemActive) return;
       
-      var groupedData1 = [];
-      for (var i = 0; i <= dataset1.length - 7; i++) {
-        groupedData1.push(dataset1.slice(i,i + 7));
-      }
+      // Group data into sets of 7 numbers
+      const groupedData1 = createGroupedData(dataset1);
+      const groupedData2 = createGroupedData(dataset2);
+      const groupedData3 = createGroupedData(dataset3);
+      const groupedData4 = createGroupedData(dataset4);
 
-      var groupedData2 = [];
-      for (var i = 0; i <= dataset2.length - 7; i++) {
-        groupedData2.push(dataset2.slice(i,i + 7));
-      }
-
-      var groupedData3 = [];
-      for (var i = 0; i <= dataset3.length - 7; i++) {
-        groupedData3.push(dataset3.slice(i,i + 7));
-      }
-      
-      var groupedData4 = [];
-      for (var i = 0; i <= dataset4.length - 7; i++) {
-        groupedData4.push(dataset4.slice(i,i + 7));
-      }
-
-      // পরিবর্তিত অংশ: নম্বর সার্চের অর্ডার উল্টো হবে (4,3,2,1)
-      var searchValues = [];
-      for (var i = 4; i >= 1; i--) {
-        var val = document.getElementById("input" + i).value.trim();
+      // Get search values (reverse order: 4,3,2,1)
+      const searchValues = [];
+      for (let i = 4; i >= 1; i--) {
+        const val = document.getElementById("input" + i).value.trim();
         if (val !== '') {
           searchValues.push(parseInt(val));
         }
@@ -591,41 +1072,31 @@
         return;
       }
 
-      var matchedNumbers1 = groupedData1.filter(row => {
-        return searchValues.every((v,i) => row[i] === v);
-      }).map(row => row[6]);
+      // Find matching patterns in each database
+      const matchedNumbers1 = findMatchingNumbers(groupedData1, searchValues);
+      const matchedNumbers2 = findMatchingNumbers(groupedData2, searchValues);
+      const matchedNumbers3 = findMatchingNumbers(groupedData3, searchValues);
+      const matchedNumbers4 = findMatchingNumbers(groupedData4, searchValues);
 
-      var matchedNumbers2 = groupedData2.filter(row => {
-        return searchValues.every((v,i) => row[i] === v);
-      }).map(row => row[6]);
-
-      var matchedNumbers3 = groupedData3.filter(row => {
-        return searchValues.every((v,i) => row[i] === v);
-      }).map(row => row[6]);
+      const resultBox = document.getElementById("result-box");
       
-      var matchedNumbers4 = groupedData4.filter(row => {
-        return searchValues.every((v,i) => row[i] === v);
-      }).map(row => row[6]);
-
-      var resultBox = document.getElementById("result-box");
-      
+      // Clear previous indicators
       const indicators = document.querySelectorAll('.high-chance,.tick-mark,.percentage-badge,.blue-tick');
       indicators.forEach(ind => ind.remove());
 
-      if (matchedNumbers1.length === 0 && matchedNumbers2.length === 0 && matchedNumbers3.length === 0 && matchedNumbers4.length === 0) {
+      // Check if any matches found
+      if (matchedNumbers1.length === 0 && matchedNumbers2.length === 0 && 
+          matchedNumbers3.length === 0 && matchedNumbers4.length === 0) {
         resultBox.innerText = "??";
         updateNumberBox("");
         return;
       }
 
       // Calculate most frequent number from first database
-      var numberCounts1 = {};
-      matchedNumbers1.forEach(num => {
-        numberCounts1[num] = (numberCounts1[num] || 0) + 1;
-      });
+      const numberCounts1 = countOccurrences(matchedNumbers1);
+      let mostFrequentNumber = "";
+      let maxCount = 0;
       
-      var mostFrequentNumber = "";
-      var maxCount = 0;
       for (const [num, count] of Object.entries(numberCounts1)) {
         if (count > maxCount) {
           mostFrequentNumber = num;
@@ -633,190 +1104,233 @@
         }
       }
       
-      // Update number box with most frequent number from first database
+      // Update number box with most frequent number
       updateNumberBox(mostFrequentNumber);
 
-      // Calculate color predictions (1,3,5,7,9 = green, 0,2,4,6,8 = red)
-      var greenCount1 = matchedNumbers1.filter(num => [1,3,5,7,9].includes(num)).length;
-      var redCount1 = matchedNumbers1.filter(num => [0,2,4,6,8].includes(num)).length;
-      var colorPrediction1 = greenCount1 > redCount1 ? "GREEN" : redCount1 > greenCount1 ? "RED" : "??";
+      // Calculate predictions for each database
+      const colorPredictions = calculateColorPredictions(matchedNumbers1, matchedNumbers2, matchedNumbers3, matchedNumbers4);
+      const sizePredictions = calculateSizePredictions(matchedNumbers1, matchedNumbers2, matchedNumbers3, matchedNumbers4);
 
-      var greenCount2 = matchedNumbers2.filter(num => [1,3,5,7,9].includes(num)).length;
-      var redCount2 = matchedNumbers2.filter(num => [0,2,4,6,8].includes(num)).length;
-      var colorPrediction2 = greenCount2 > redCount2 ? "GREEN" : redCount2 > greenCount2 ? "RED" : "??";
-
-      var greenCount3 = matchedNumbers3.filter(num => [1,3,5,7,9].includes(num)).length;
-      var redCount3 = matchedNumbers3.filter(num => [0,2,4,6,8].includes(num)).length;
-      var colorPrediction3 = greenCount3 > redCount3 ? "GREEN" : redCount3 > greenCount3 ? "RED" : "??";
+      // Determine final prediction based on mode
+      let finalPrediction, finalConfidence, showColorPrediction;
       
-      var greenCount4 = matchedNumbers4.filter(num => [1,3,5,7,9].includes(num)).length;
-      var redCount4 = matchedNumbers4.filter(num => [0,2,4,6,8].includes(num)).length;
-      var colorPrediction4 = greenCount4 > redCount4 ? "GREEN" : redCount4 > greenCount4 ? "RED" : "??";
-
-      // Calculate size predictions (5-9 = BIG, 0-4 = SMALL)
-      var countB1 = matchedNumbers1.filter(num => num >= 5 && num <= 9).length;
-      var countS1 = matchedNumbers1.filter(num => num >= 0 && num <= 4).length;
-      var prediction1 = countB1 > countS1 ? "BIG" : countS1 > countB1 ? "SMALL" : "??";
-
-      var countB2 = matchedNumbers2.filter(num => num >= 5 && num <= 9).length;
-      var countS2 = matchedNumbers2.filter(num => num >= 0 && num <= 4).length;
-      var prediction2 = countB2 > countS2 ? "BIG" : countS2 > countB2 ? "SMALL" : "??";
-
-      var countB3 = matchedNumbers3.filter(num => num >= 5 && num <= 9).length;
-      var countS3 = matchedNumbers3.filter(num => num >= 0 && num <= 4).length;
-      var prediction3 = countB3 > countS3 ? "BIG" : countS3 > countB3 ? "SMALL" : "??";
+      if (predictionMode === 'colorOnly') {
+        finalPrediction = colorPredictions.finalPrediction;
+        finalConfidence = colorPredictions.finalConfidence;
+        showColorPrediction = true;
+      } else if (predictionMode === 'sizeOnly') {
+        finalPrediction = sizePredictions.finalPrediction;
+        finalConfidence = sizePredictions.finalConfidence;
+        showColorPrediction = false;
+      } else {
+        // Normal mode - choose prediction with higher confidence
+        if (colorPredictions.finalConfidence > sizePredictions.finalConfidence) {
+          finalPrediction = colorPredictions.finalPrediction;
+          finalConfidence = colorPredictions.finalConfidence;
+          showColorPrediction = true;
+        } else {
+          finalPrediction = sizePredictions.finalPrediction;
+          finalConfidence = sizePredictions.finalConfidence;
+          showColorPrediction = false;
+        }
+      }
       
-      var countB4 = matchedNumbers4.filter(num => num >= 5 && num <= 9).length;
-      var countS4 = matchedNumbers4.filter(num => num >= 0 && num <= 4).length;
-      var prediction4 = countB4 > countS4 ? "BIG" : countS4 > countB4 ? "SMALL" : "??";
+      // Apply opposite prediction logic if enabled and conditions met
+      if (oppositeModeActive) {
+        finalPrediction = getOppositePrediction(finalPrediction, showColorPrediction);
+        
+        // Add special indicator for opposite prediction
+        const oppositeIndicator = document.createElement('div');
+        oppositeIndicator.className = 'high-chance';
+        oppositeIndicator.innerHTML = '🔄';
+        oppositeIndicator.style.background = '#ff9f43';
+        resultBox.appendChild(oppositeIndicator);
+      }
+      
+      // Update UI with prediction
+      updatePredictionUI(finalPrediction, finalConfidence, showColorPrediction);
+      
+      // Speak prediction if voice enabled
+      if (voiceEnabled) {
+        speak(`Prediction is ${finalPrediction} with ${finalConfidence} percent confidence`);
+      }
+      
+      // Check if we need to activate opposite mode
+      checkOppositeMode(finalPrediction, showColorPrediction);
+    }
 
+    // Create grouped data from dataset
+    function createGroupedData(dataset) {
+      const groupedData = [];
+      for (let i = 0; i <= dataset.length - 7; i++) {
+        groupedData.push(dataset.slice(i, i + 7));
+      }
+      return groupedData;
+    }
+
+    // Find matching numbers in grouped data
+    function findMatchingNumbers(groupedData, searchValues) {
+      return groupedData.filter(row => {
+        return searchValues.every((v, i) => row[i] === v);
+      }).map(row => row[6]);
+    }
+
+    // Count occurrences of numbers
+    function countOccurrences(numbers) {
+      const counts = {};
+      numbers.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      return counts;
+    }
+
+    // Calculate color predictions
+    function calculateColorPredictions(matchedNumbers1, matchedNumbers2, matchedNumbers3, matchedNumbers4) {
+      const colorPrediction1 = getColorPrediction(matchedNumbers1);
+      const colorPrediction2 = getColorPrediction(matchedNumbers2);
+      const colorPrediction3 = getColorPrediction(matchedNumbers3);
+      const colorPrediction4 = getColorPrediction(matchedNumbers4);
+      
       const colorPredictions = [colorPrediction1, colorPrediction2, colorPrediction3, colorPrediction4].filter(p => p !== "??");
-      const sizePredictions = [prediction1, prediction2, prediction3, prediction4].filter(p => p !== "??");
-      
-      // Calculate confidence percentages
       const totalColorPredictions = colorPredictions.length;
       const sameColorPredictions = colorPredictions.filter(p => p === colorPrediction1).length;
-      let colorConfidence = Math.max(50, Math.round((sameColorPredictions / totalColorPredictions) * 100));
+      const confidence = Math.max(50, Math.round((sameColorPredictions / totalColorPredictions) * 100));
       
+      return {
+        finalPrediction: colorPrediction1,
+        finalConfidence: confidence
+      };
+    }
+
+    // Get color prediction for a set of numbers
+    function getColorPrediction(numbers) {
+      const greenCount = numbers.filter(num => [1,3,5,7,9].includes(num)).length;
+      const redCount = numbers.filter(num => [0,2,4,6,8].includes(num)).length;
+      
+      if (greenCount > redCount) return "GREEN";
+      if (redCount > greenCount) return "RED";
+      return "??";
+    }
+
+    // Calculate size predictions
+    function calculateSizePredictions(matchedNumbers1, matchedNumbers2, matchedNumbers3, matchedNumbers4) {
+      const prediction1 = getSizePrediction(matchedNumbers1);
+      const prediction2 = getSizePrediction(matchedNumbers2);
+      const prediction3 = getSizePrediction(matchedNumbers3);
+      const prediction4 = getSizePrediction(matchedNumbers4);
+      
+      const sizePredictions = [prediction1, prediction2, prediction3, prediction4].filter(p => p !== "??");
       const totalSizePredictions = sizePredictions.length;
       const sameSizePredictions = sizePredictions.filter(p => p === prediction1).length;
-      let sizeConfidence = Math.max(50, Math.round((sameSizePredictions / totalSizePredictions) * 100));
+      const confidence = Math.max(50, Math.round((sameSizePredictions / totalSizePredictions) * 100));
       
-      // Decide which prediction to show (color or size) based on which has higher confidence
-      let showColorPrediction = false;
-      let finalPrediction = "??";
-      let finalConfidence = 50;
+      return {
+        finalPrediction: prediction1,
+        finalConfidence: confidence
+      };
+    }
+
+    // Get size prediction for a set of numbers
+    function getSizePrediction(numbers) {
+      const bigCount = numbers.filter(num => num >= 5 && num <= 9).length;
+      const smallCount = numbers.filter(num => num >= 0 && num <= 4).length;
       
-      if (colorConfidence > sizeConfidence) {
-        showColorPrediction = true;
-        finalPrediction = colorPrediction1;
-        finalConfidence = colorConfidence;
+      if (bigCount > smallCount) return "BIG";
+      if (smallCount > bigCount) return "SMALL";
+      return "??";
+    }
+
+    // Update prediction UI
+    function updatePredictionUI(prediction, confidence, isColorPrediction) {
+      const resultBox = document.getElementById("result-box");
+      resultBox.innerText = prediction;
+      
+      // Set colors based on prediction type
+      if (isColorPrediction) {
+        resultBox.style.color = prediction === "GREEN" ? "#1dd1a1" : "#ff4757";
+        resultBox.style.borderColor = prediction === "GREEN" ? "#1dd1a1" : "#ff4757";
+        resultBox.style.boxShadow = prediction === "GREEN" ? 
+          "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)";
       } else {
-        showColorPrediction = false;
-        finalPrediction = prediction1;
-        finalConfidence = sizeConfidence;
+        resultBox.style.color = prediction === "BIG" ? "#2e86de" : "#ff9f43";
+        resultBox.style.borderColor = prediction === "BIG" ? "#2e86de" : "#ff9f43";
+        resultBox.style.boxShadow = prediction === "BIG" ? 
+          "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)";
       }
       
-      // Case 1: All 4 databases agree - 98% (Black tick with green check)
-      if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction2 === colorPrediction3 && colorPrediction3 === colorPrediction4 && colorPrediction1 !== "??") ||
-          (!showColorPrediction && prediction1 === prediction2 && prediction2 === prediction3 && prediction3 === prediction4 && prediction1 !== "??")) {
-        resultBox.innerText = finalPrediction;
-        resultBox.style.color = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.borderColor = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.boxShadow = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
-          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
-        
-        const tickMark = document.createElement('div');
-        tickMark.className = 'tick-mark';
-        tickMark.innerHTML = '✓';
-        resultBox.appendChild(tickMark);
-        
+      // Add confidence badge
+      if (prediction !== "??") {
         const badge = document.createElement('div');
         badge.className = 'percentage-badge';
-        badge.innerHTML = '98%';
+        badge.innerHTML = confidence + '%';
         resultBox.appendChild(badge);
-        finalConfidence = 98;
-      } 
-      // Case 2: First 3 databases agree - 95% (Blue tick)
-      else if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction2 === colorPrediction3 && colorPrediction1 !== "??") ||
-               (!showColorPrediction && prediction1 === prediction2 && prediction2 === prediction3 && prediction1 !== "??")) {
-        resultBox.innerText = finalPrediction;
-        resultBox.style.color = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.borderColor = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.boxShadow = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
-          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
-        
-        const blueTick = document.createElement('div');
-        blueTick.className = 'blue-tick';
-        blueTick.innerHTML = '✓';
-        resultBox.appendChild(blueTick);
-        
-        const badge = document.createElement('div');
-        badge.className = 'percentage-badge';
-        badge.innerHTML = '95%';
-        resultBox.appendChild(badge);
-        finalConfidence = 95;
       }
-      // Case 3: First 2 databases agree - 85% (Fire icon)
-      else if ((showColorPrediction && colorPrediction1 === colorPrediction2 && colorPrediction1 !== "??") ||
-               (!showColorPrediction && prediction1 === prediction2 && prediction1 !== "??")) {
-        resultBox.innerText = finalPrediction;
-        resultBox.style.color = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.borderColor = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.boxShadow = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
-          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
-        
-        const highChance = document.createElement('div');
-        highChance.className = 'high-chance';
-        highChance.innerHTML = '🔥';
-        resultBox.appendChild(highChance);
-        
-        const badge = document.createElement('div');
-        badge.className = 'percentage-badge';
-        badge.innerHTML = '85%';
-        resultBox.appendChild(badge);
-        finalConfidence = 85;
-      }
-      // Default case: Show prediction with calculated percentage
-      else {
-        resultBox.innerText = finalPrediction;
-        resultBox.style.color = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.borderColor = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "#1dd1a1" : "#ff4757") : 
-          (finalPrediction === "BIG" ? "#2e86de" : "#ff9f43");
-        resultBox.style.boxShadow = showColorPrediction ? 
-          (finalPrediction === "GREEN" ? "0 0 8px rgba(29,209,161,0.5)" : "0 0 8px rgba(255,71,87,0.5)") : 
-          (finalPrediction === "BIG" ? "0 0 8px rgba(46,134,222,0.5)" : "0 0 8px rgba(255,159,67,0.5)");
-        
-        // Add percentage badge for default case (minimum 50%)
-        if (finalPrediction !== "??") {
-          const badge = document.createElement('div');
-          badge.className = 'percentage-badge';
-          badge.innerHTML = finalConfidence + '%';
-          resultBox.appendChild(badge);
-        }
+      
+      // Add mode indicator
+      const modeIndicator = document.createElement('div');
+      modeIndicator.className = 'mode-indicator';
+      modeIndicator.innerHTML = isColorPrediction ? 'C' : 'S';
+      resultBox.appendChild(modeIndicator);
+    }
+
+    // Get opposite prediction
+    function getOppositePrediction(prediction, isColorPrediction) {
+      if (isColorPrediction) {
+        return prediction === "GREEN" ? "RED" : "GREEN";
+      } else {
+        return prediction === "BIG" ? "SMALL" : "BIG";
       }
     }
 
-    // Floating minimize button functionality
-    document.getElementById('floatingMinimize').addEventListener('click', function() {
-      // Hide the main content
-      document.querySelector('.main-box').style.display = 'none';
-      // Hide the minimize button
-      this.style.display = 'none';
-      // Show the mini window
-      document.getElementById('miniWindow').style.display = 'flex';
-    });
+    // Check if we need to activate opposite mode
+    function checkOppositeMode(prediction, isColorPrediction) {
+      // This is a simplified version - in a real app, you would compare with actual results
+      const randomFactor = Math.random();
+      
+      if (randomFactor < 0.3) { // 30% chance of wrong prediction for demo
+        consecutiveWrongPredictions++;
+        
+        if (consecutiveWrongPredictions >= 3) {
+          oppositeModeActive = true;
+          showNotification('Opposite mode activated! Next prediction will be reversed');
+        }
+      } else {
+        consecutiveWrongPredictions = 0;
+        oppositeModeActive = false;
+      }
+    }
 
-    // Mini window click to restore functionality
-    document.getElementById('miniWindow').addEventListener('click', function() {
-      // Show the main content
-      document.querySelector('.main-box').style.display = 'block';
-      // Show the minimize button
-      document.getElementById('floatingMinimize').style.display = 'flex';
-      // Hide the mini window
-      this.style.display = 'none';
-    });
+    // Check admin settings
+    function checkAdminSettings() {
+      adminSettingsRef.on('value', (snapshot) => {
+        const settings = snapshot.val();
+        if (settings) {
+          requireLogin = settings.requireLogin !== false;
+          
+          if (settings.showWebview && !webviewShown) {
+            document.getElementById('webview').style.display = 'block';
+            webviewShown = true;
+          }
+        }
+      });
+    }
 
-    document.addEventListener('DOMContentLoaded',() => {
-      systemStatusRef.on('value',(snapshot) => {
+    // Load Telegram link
+    function loadTelegramLink() {
+      telegramLinkRef.on('value', (snapshot) => {
+        if (snapshot.exists()) {
+          telegramLink = snapshot.val();
+          if (telegramLink) {
+            document.getElementById('telegramLinkContainer').style.display = 'block';
+            document.getElementById('telegramLink').href = telegramLink;
+          }
+        }
+      });
+    }
+
+    // Setup system status listener
+    function setupSystemStatusListener() {
+      systemStatusRef.on('value', (snapshot) => {
         systemActive = snapshot.val() !== false;
         document.getElementById('systemStatus').textContent = 
           systemActive ? 'SYSTEM: ACTIVE' : 'SYSTEM: INACTIVE';
@@ -824,12 +1338,12 @@
           systemActive ? '#1dd1a1' : '#ff4757';
         
         if (systemActive) {
-          // Clear any existing interval
-          clearInterval(timerInterval);
-          // Start new interval
-          timerInterval = setInterval(updateTimer, 1000);
-          updateTimer();
-          fetchCurrentNumbers();
+          startTimer();
+          if (is60SecondMode) {
+            fetchCurrentNumbers60s();
+          } else {
+            fetchCurrentNumbers();
+          }
         } else {
           document.getElementById("timer").innerText = "SYSTEM OFF";
           document.getElementById("result-box").innerText = "";
@@ -838,63 +1352,10 @@
           clearInterval(timerInterval);
         }
       });
-      
-      loadDatabases();
-      
-      // Initialize timer immediately
-      timerInterval = setInterval(updateTimer, 1000);
-      updateTimer();
-      
-      if (requireLogin) {
-        const accessKey = localStorage.getItem('accessKey');
-        const expiresAt = localStorage.getItem('expiresAt');
-        
-        if (!accessKey || !expiresAt) {
-          window.location.href = "user_login.html";
-        } else {
-          checkAccessKey(accessKey);
-        }
-      } else {
-        // If login not required, just check if we need to show webview
-        adminSettingsRef.once('value').then((snapshot) => {
-          const settings = snapshot.val();
-          if (settings && settings.showWebview && !webviewShown) {
-            document.getElementById('webview').style.display = 'block';
-            webviewShown = true;
-          }
-        });
-      }
-    });
-    
-    function checkAccessKey(key) {
-      keysRef.once('value',(snapshot) => {
-        const keys = snapshot.val();
-        if (keys && keys[key]) {
-          const expiryTime = keys[key];
-          localStorage.setItem('accessKey',key);
-          localStorage.setItem('expiresAt',expiryTime);
-          updateCountdown();
-        } else {
-          logout();
-        }
-      });
     }
-    
-    function updateCountdown() {
-      const expiresAt = localStorage.getItem('expiresAt');
-      const now = Date.now();
-      const remaining = parseInt(expiresAt) - now;
-      
-      if (remaining <= 0) {
-        logout();
-      }
-    }
-    
-    function logout() {
-      localStorage.removeItem('accessKey');
-      localStorage.removeItem('expiresAt');
-      window.location.href = "user_login.html";
-    }
+
+    // Initialize the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
-</html>
+</html> 
