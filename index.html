@@ -642,7 +642,15 @@
     <div class="settings-option">
       <span>Voice Notification</span>
       <label class="switch">
-        <input type="checkbox" id="voiceToggle">
+        <input type="checkbox" id="voiceToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="settings-option">
+      <span>Opposite Prediction Mode</span>
+      <label class="switch">
+        <input type="checkbox" id="oppositeModeToggle">
         <span class="slider"></span>
       </label>
     </div>
@@ -708,12 +716,14 @@
     var doubleClickTimer = null;
     var clickCount = 0;
     var predictionMode = 'normal'; // 'normal', 'colorOnly', 'sizeOnly'
-    var voiceEnabled = false;
+    var voiceEnabled = true; // Auto-enabled by default
     var bettingSteps = [1, 3, 9];
     var currentBettingStep = 0;
     var livePredictionEnabled = true;
     var oppositeModeActive = false;
     var consecutiveWrongPredictions = 0;
+    var oppositeModeSetting = false; // New setting for opposite prediction mode
+    var winLossHistory = []; // Track win/loss history
 
     // Initialize the application
     function init() {
@@ -828,6 +838,7 @@
       
       voiceEnabled = document.getElementById('voiceToggle').checked;
       livePredictionEnabled = document.getElementById('livePredictionToggle').checked;
+      oppositeModeSetting = document.getElementById('oppositeModeToggle').checked;
       
       // Save betting steps
       bettingSteps = [
@@ -840,6 +851,7 @@
       localStorage.setItem('predictionMode', predictionMode);
       localStorage.setItem('voiceEnabled', voiceEnabled);
       localStorage.setItem('livePredictionEnabled', livePredictionEnabled);
+      localStorage.setItem('oppositeModeSetting', oppositeModeSetting);
       localStorage.setItem('bettingSteps', JSON.stringify(bettingSteps));
       
       closeSettings();
@@ -849,8 +861,9 @@
     // Load settings from localStorage
     function loadSettings() {
       predictionMode = localStorage.getItem('predictionMode') || 'normal';
-      voiceEnabled = localStorage.getItem('voiceEnabled') === 'true';
+      voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false'; // Auto-enabled by default
       livePredictionEnabled = localStorage.getItem('livePredictionEnabled') !== 'false';
+      oppositeModeSetting = localStorage.getItem('oppositeModeSetting') === 'true';
       
       const savedBettingSteps = localStorage.getItem('bettingSteps');
       if (savedBettingSteps) {
@@ -862,6 +875,7 @@
       document.getElementById('sizeOnlyToggle').checked = predictionMode === 'sizeOnly';
       document.getElementById('voiceToggle').checked = voiceEnabled;
       document.getElementById('livePredictionToggle').checked = livePredictionEnabled;
+      document.getElementById('oppositeModeToggle').checked = oppositeModeSetting;
       document.getElementById('step1Amount').value = bettingSteps[0];
       document.getElementById('step2Amount').value = bettingSteps[1];
       document.getElementById('step3Amount').value = bettingSteps[2];
@@ -1136,15 +1150,26 @@
       }
       
       // Apply opposite prediction logic if enabled and conditions met
-      if (oppositeModeActive) {
-        finalPrediction = getOppositePrediction(finalPrediction, showColorPrediction);
+      if (oppositeModeSetting) {
+        // Track win/loss history
+        trackWinLoss(finalPrediction, showColorPrediction);
         
-        // Add special indicator for opposite prediction
-        const oppositeIndicator = document.createElement('div');
-        oppositeIndicator.className = 'high-chance';
-        oppositeIndicator.innerHTML = '🔄';
-        oppositeIndicator.style.background = '#ff9f43';
-        resultBox.appendChild(oppositeIndicator);
+        // If 3 consecutive losses, activate opposite mode
+        if (checkThreeConsecutiveLosses()) {
+          oppositeModeActive = true;
+          finalPrediction = getOppositePrediction(finalPrediction, showColorPrediction);
+          
+          // Add special indicator for opposite prediction
+          const oppositeIndicator = document.createElement('div');
+          oppositeIndicator.className = 'high-chance';
+          oppositeIndicator.innerHTML = '🔄';
+          oppositeIndicator.style.background = '#ff9f43';
+          resultBox.appendChild(oppositeIndicator);
+          
+          showNotification('Opposite mode activated! Prediction reversed');
+        } else {
+          oppositeModeActive = false;
+        }
       }
       
       // Update UI with prediction
@@ -1154,9 +1179,49 @@
       if (voiceEnabled) {
         speak(`Prediction is ${finalPrediction} with ${finalConfidence} percent confidence`);
       }
+    }
+
+    // Track win/loss history
+    function trackWinLoss(prediction, isColorPrediction) {
+      // Get the actual result (this is a simulation - in a real app, you would get this from the API)
+      const actualNumber = document.getElementById("input1").value;
+      let actualResult;
       
-      // Check if we need to activate opposite mode
-      checkOppositeMode(finalPrediction, showColorPrediction);
+      if (isColorPrediction) {
+        // Check if number is red (0,2,4,6,8) or green (1,3,5,7,9)
+        actualResult = [0,2,4,6,8].includes(parseInt(actualNumber)) ? "RED" : "GREEN";
+      } else {
+        // Check if number is small (0-4) or big (5-9)
+        actualResult = parseInt(actualNumber) <= 4 ? "SMALL" : "BIG";
+      }
+      
+      // Determine if prediction was correct
+      const isWin = prediction === actualResult;
+      
+      // Add to history (max 10 entries)
+      winLossHistory.unshift({
+        prediction: prediction,
+        actual: actualResult,
+        isWin: isWin,
+        timestamp: new Date().getTime()
+      });
+      
+      if (winLossHistory.length > 10) {
+        winLossHistory.pop();
+      }
+      
+      // Log for debugging (invisible to user)
+      console.log("Win/Loss History:", winLossHistory);
+    }
+
+    // Check for three consecutive losses
+    function checkThreeConsecutiveLosses() {
+      if (winLossHistory.length < 3) return false;
+      
+      // Check if last 3 predictions were losses
+      return !winLossHistory[0].isWin && 
+             !winLossHistory[1].isWin && 
+             !winLossHistory[2].isWin;
     }
 
     // Create grouped data from dataset
@@ -1282,24 +1347,6 @@
       }
     }
 
-    // Check if we need to activate opposite mode
-    function checkOppositeMode(prediction, isColorPrediction) {
-      // This is a simplified version - in a real app, you would compare with actual results
-      const randomFactor = Math.random();
-      
-      if (randomFactor < 0.3) { // 30% chance of wrong prediction for demo
-        consecutiveWrongPredictions++;
-        
-        if (consecutiveWrongPredictions >= 3) {
-          oppositeModeActive = true;
-          showNotification('Opposite mode activated! Next prediction will be reversed');
-        }
-      } else {
-        consecutiveWrongPredictions = 0;
-        oppositeModeActive = false;
-      }
-    }
-
     // Check admin settings
     function checkAdminSettings() {
       adminSettingsRef.on('value', (snapshot) => {
@@ -1358,4 +1405,4 @@
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
-</html> 
+</html>
