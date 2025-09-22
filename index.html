@@ -542,6 +542,21 @@
       left: 5px;
       color: var(--accent-color);
     }
+    
+    /* Win/Loss counter */
+    .win-loss-counter {
+      font-size: 10px;
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--secondary-color);
+      background: rgba(0,0,0,0.7);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--secondary-color);
+      display: none;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -570,6 +585,7 @@
         <div class="prediction-box" id="result-box"></div>
         <div class="number-box" id="number-box"></div>
         <div class="hidden-time" id="hiddenTime"></div>
+        <div class="win-loss-counter" id="winLossCounter">W:0 L:0</div>
       </div>
       
       <div class="input-row">
@@ -616,17 +632,9 @@
     </div>
     
     <div class="settings-option">
-      <span>Color Prediction Only</span>
+      <span>Use Opposite Function</span>
       <label class="switch">
-        <input type="checkbox" id="colorOnlyToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-    
-    <div class="settings-option">
-      <span>Size Prediction Only</span>
-      <label class="switch">
-        <input type="checkbox" id="sizeOnlyToggle">
+        <input type="checkbox" id="oppositeFunctionToggle">
         <span class="slider"></span>
       </label>
     </div>
@@ -647,27 +655,11 @@
       </label>
     </div>
     
-    <div class="settings-option">
-      <span>Opposite Prediction Mode</span>
-      <label class="switch">
-        <input type="checkbox" id="oppositeModeToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-    
     <div class="betting-controls">
-      <h3>Betting Steps</h3>
+      <h3>Opposite Function Settings</h3>
       <div class="bet-step">
-        <span>Step 1 Amount:</span>
-        <input type="number" class="bet-input" id="step1Amount" value="1" min="1">
-      </div>
-      <div class="bet-step">
-        <span>Step 2 Amount:</span>
-        <input type="number" class="bet-input" id="step2Amount" value="3" min="1">
-      </div>
-      <div class="bet-step">
-        <span>Step 3 Amount:</span>
-        <input type="number" class="bet-input" id="step3Amount" value="9" min="1">
+        <span>Loss Threshold:</span>
+        <input type="number" class="bet-input" id="lossThreshold" value="3" min="1">
       </div>
     </div>
     
@@ -715,15 +707,17 @@
     var marketIndicator = document.createElement('div');
     var doubleClickTimer = null;
     var clickCount = 0;
-    var predictionMode = 'normal'; // 'normal', 'colorOnly', 'sizeOnly'
-    var voiceEnabled = true; // Auto-enabled by default
-    var bettingSteps = [1, 3, 9];
-    var currentBettingStep = 0;
+    var voiceEnabled = true; // Auto enabled by default
     var livePredictionEnabled = true;
+    var oppositeFunctionEnabled = false;
+    var lossThreshold = 3;
+    var winCount = 0;
+    var lossCount = 0;
+    var consecutiveLosses = 0;
     var oppositeModeActive = false;
-    var consecutiveWrongPredictions = 0;
-    var oppositeModeSetting = false; // New setting for opposite prediction mode
-    var winLossHistory = []; // Track win/loss history
+    var lastPrediction = "";
+    var lastPredictionType = ""; // 'color' or 'size'
+    var lastActualResult = "";
 
     // Initialize the application
     function init() {
@@ -735,6 +729,11 @@
       checkAdminSettings();
       loadTelegramLink();
       setupSystemStatusListener();
+      
+      // Auto-enable voice on startup
+      if (voiceEnabled) {
+        speak("System started successfully. Voice notifications are enabled.");
+      }
     }
 
     // Create market indicator
@@ -833,52 +832,42 @@
 
     // Save settings
     function saveSettings() {
-      predictionMode = document.getElementById('colorOnlyToggle').checked ? 'colorOnly' : 
-                      document.getElementById('sizeOnlyToggle').checked ? 'sizeOnly' : 'normal';
-      
+      oppositeFunctionEnabled = document.getElementById('oppositeFunctionToggle').checked;
       voiceEnabled = document.getElementById('voiceToggle').checked;
       livePredictionEnabled = document.getElementById('livePredictionToggle').checked;
-      oppositeModeSetting = document.getElementById('oppositeModeToggle').checked;
-      
-      // Save betting steps
-      bettingSteps = [
-        parseInt(document.getElementById('step1Amount').value) || 1,
-        parseInt(document.getElementById('step2Amount').value) || 3,
-        parseInt(document.getElementById('step3Amount').value) || 9
-      ];
+      lossThreshold = parseInt(document.getElementById('lossThreshold').value) || 3;
       
       // Save to localStorage
-      localStorage.setItem('predictionMode', predictionMode);
+      localStorage.setItem('oppositeFunctionEnabled', oppositeFunctionEnabled);
       localStorage.setItem('voiceEnabled', voiceEnabled);
       localStorage.setItem('livePredictionEnabled', livePredictionEnabled);
-      localStorage.setItem('oppositeModeSetting', oppositeModeSetting);
-      localStorage.setItem('bettingSteps', JSON.stringify(bettingSteps));
+      localStorage.setItem('lossThreshold', lossThreshold);
       
       closeSettings();
       showNotification('Settings saved successfully');
+      
+      if (voiceEnabled) {
+        speak('Settings saved successfully');
+      }
     }
 
     // Load settings from localStorage
     function loadSettings() {
-      predictionMode = localStorage.getItem('predictionMode') || 'normal';
-      voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false'; // Auto-enabled by default
+      oppositeFunctionEnabled = localStorage.getItem('oppositeFunctionEnabled') === 'true';
+      voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false'; // Default to true
       livePredictionEnabled = localStorage.getItem('livePredictionEnabled') !== 'false';
-      oppositeModeSetting = localStorage.getItem('oppositeModeSetting') === 'true';
-      
-      const savedBettingSteps = localStorage.getItem('bettingSteps');
-      if (savedBettingSteps) {
-        bettingSteps = JSON.parse(savedBettingSteps);
-      }
+      lossThreshold = parseInt(localStorage.getItem('lossThreshold')) || 3;
       
       // Update UI
-      document.getElementById('colorOnlyToggle').checked = predictionMode === 'colorOnly';
-      document.getElementById('sizeOnlyToggle').checked = predictionMode === 'sizeOnly';
+      document.getElementById('oppositeFunctionToggle').checked = oppositeFunctionEnabled;
       document.getElementById('voiceToggle').checked = voiceEnabled;
       document.getElementById('livePredictionToggle').checked = livePredictionEnabled;
-      document.getElementById('oppositeModeToggle').checked = oppositeModeSetting;
-      document.getElementById('step1Amount').value = bettingSteps[0];
-      document.getElementById('step2Amount').value = bettingSteps[1];
-      document.getElementById('step3Amount').value = bettingSteps[2];
+      document.getElementById('lossThreshold').value = lossThreshold;
+      
+      // Show win/loss counter if opposite function is enabled
+      if (oppositeFunctionEnabled) {
+        document.getElementById('winLossCounter').style.display = 'block';
+      }
     }
 
     // Toggle voice notifications
@@ -999,6 +988,11 @@
           inputElement.value = latestNumbers[i] !== undefined ? latestNumbers[i] : '';
         }
 
+        // Check result and update win/loss counter
+        if (lastPrediction && latestNumbers[0] !== undefined) {
+          checkResult(latestNumbers[0]);
+        }
+        
         processData();
       } catch (error) {
         console.error("Fetch error:", error);
@@ -1023,10 +1017,79 @@
           inputElement.value = latestNumbers[i] !== undefined ? latestNumbers[i] : '';
         }
 
+        // Check result and update win/loss counter
+        if (lastPrediction && latestNumbers[0] !== undefined) {
+          checkResult(latestNumbers[0]);
+        }
+        
         processData();
       } catch (error) {
         console.error("Fetch error:", error);
       }
+    }
+
+    // Check if the last prediction was correct
+    function checkResult(actualNumber) {
+      if (!lastPrediction || !lastPredictionType) return;
+      
+      let actualResult = "";
+      
+      if (lastPredictionType === 'color') {
+        // Check if actual number matches the predicted color
+        const isGreen = [1,3,5,7,9].includes(actualNumber);
+        const isRed = [0,2,4,6,8].includes(actualNumber);
+        
+        if (isGreen) actualResult = "GREEN";
+        else if (isRed) actualResult = "RED";
+        
+        const isCorrect = lastPrediction === actualResult;
+        updateWinLossCounter(isCorrect);
+        
+      } else if (lastPredictionType === 'size') {
+        // Check if actual number matches the predicted size
+        const isBig = actualNumber >= 5 && actualNumber <= 9;
+        const isSmall = actualNumber >= 0 && actualNumber <= 4;
+        
+        if (isBig) actualResult = "BIG";
+        else if (isSmall) actualResult = "SMALL";
+        
+        const isCorrect = lastPrediction === actualResult;
+        updateWinLossCounter(isCorrect);
+      }
+      
+      lastActualResult = actualResult;
+    }
+
+    // Update win/loss counter
+    function updateWinLossCounter(isCorrect) {
+      if (isCorrect) {
+        winCount++;
+        consecutiveLosses = 0;
+        oppositeModeActive = false;
+        
+        if (voiceEnabled) {
+          speak("Congratulations! Prediction was correct.");
+        }
+      } else {
+        lossCount++;
+        consecutiveLosses++;
+        
+        if (voiceEnabled) {
+          speak("Prediction was wrong. Loss count increased.");
+        }
+        
+        // Check if we need to activate opposite mode
+        if (oppositeFunctionEnabled && consecutiveLosses >= lossThreshold) {
+          oppositeModeActive = true;
+          
+          if (voiceEnabled) {
+            speak(`Activating opposite mode after ${consecutiveLosses} consecutive losses.`);
+          }
+        }
+      }
+      
+      // Update the counter display
+      document.getElementById('winLossCounter').textContent = `W:${winCount} L:${lossCount}`;
     }
 
     // Clear inputs
@@ -1125,103 +1188,46 @@
       const colorPredictions = calculateColorPredictions(matchedNumbers1, matchedNumbers2, matchedNumbers3, matchedNumbers4);
       const sizePredictions = calculateSizePredictions(matchedNumbers1, matchedNumbers2, matchedNumbers3, matchedNumbers4);
 
-      // Determine final prediction based on mode
-      let finalPrediction, finalConfidence, showColorPrediction;
+      // Determine final prediction based on confidence
+      let finalPrediction, finalConfidence, predictionType;
       
-      if (predictionMode === 'colorOnly') {
+      if (colorPredictions.finalConfidence > sizePredictions.finalConfidence) {
         finalPrediction = colorPredictions.finalPrediction;
         finalConfidence = colorPredictions.finalConfidence;
-        showColorPrediction = true;
-      } else if (predictionMode === 'sizeOnly') {
+        predictionType = 'color';
+      } else {
         finalPrediction = sizePredictions.finalPrediction;
         finalConfidence = sizePredictions.finalConfidence;
-        showColorPrediction = false;
-      } else {
-        // Normal mode - choose prediction with higher confidence
-        if (colorPredictions.finalConfidence > sizePredictions.finalConfidence) {
-          finalPrediction = colorPredictions.finalPrediction;
-          finalConfidence = colorPredictions.finalConfidence;
-          showColorPrediction = true;
-        } else {
-          finalPrediction = sizePredictions.finalPrediction;
-          finalConfidence = sizePredictions.finalConfidence;
-          showColorPrediction = false;
+        predictionType = 'size';
+      }
+      
+      // Apply opposite prediction if opposite mode is active
+      if (oppositeModeActive && oppositeFunctionEnabled) {
+        finalPrediction = getOppositePrediction(finalPrediction, predictionType);
+        
+        // Add special indicator for opposite prediction
+        const oppositeIndicator = document.createElement('div');
+        oppositeIndicator.className = 'high-chance';
+        oppositeIndicator.innerHTML = '🔄';
+        oppositeIndicator.style.background = '#ff9f43';
+        resultBox.appendChild(oppositeIndicator);
+        
+        if (voiceEnabled) {
+          speak(`Opposite mode active. Prediction is ${finalPrediction}`);
         }
       }
       
-      // Apply opposite prediction logic if enabled and conditions met
-      if (oppositeModeSetting) {
-        // Track win/loss history
-        trackWinLoss(finalPrediction, showColorPrediction);
-        
-        // If 3 consecutive losses, activate opposite mode
-        if (checkThreeConsecutiveLosses()) {
-          oppositeModeActive = true;
-          finalPrediction = getOppositePrediction(finalPrediction, showColorPrediction);
-          
-          // Add special indicator for opposite prediction
-          const oppositeIndicator = document.createElement('div');
-          oppositeIndicator.className = 'high-chance';
-          oppositeIndicator.innerHTML = '🔄';
-          oppositeIndicator.style.background = '#ff9f43';
-          resultBox.appendChild(oppositeIndicator);
-          
-          showNotification('Opposite mode activated! Prediction reversed');
-        } else {
-          oppositeModeActive = false;
-        }
-      }
+      // Store the prediction for result checking
+      lastPrediction = finalPrediction;
+      lastPredictionType = predictionType;
       
       // Update UI with prediction
-      updatePredictionUI(finalPrediction, finalConfidence, showColorPrediction);
+      updatePredictionUI(finalPrediction, finalConfidence, predictionType === 'color');
       
       // Speak prediction if voice enabled
       if (voiceEnabled) {
         speak(`Prediction is ${finalPrediction} with ${finalConfidence} percent confidence`);
       }
-    }
-
-    // Track win/loss history
-    function trackWinLoss(prediction, isColorPrediction) {
-      // Get the actual result (this is a simulation - in a real app, you would get this from the API)
-      const actualNumber = document.getElementById("input1").value;
-      let actualResult;
-      
-      if (isColorPrediction) {
-        // Check if number is red (0,2,4,6,8) or green (1,3,5,7,9)
-        actualResult = [0,2,4,6,8].includes(parseInt(actualNumber)) ? "RED" : "GREEN";
-      } else {
-        // Check if number is small (0-4) or big (5-9)
-        actualResult = parseInt(actualNumber) <= 4 ? "SMALL" : "BIG";
-      }
-      
-      // Determine if prediction was correct
-      const isWin = prediction === actualResult;
-      
-      // Add to history (max 10 entries)
-      winLossHistory.unshift({
-        prediction: prediction,
-        actual: actualResult,
-        isWin: isWin,
-        timestamp: new Date().getTime()
-      });
-      
-      if (winLossHistory.length > 10) {
-        winLossHistory.pop();
-      }
-      
-      // Log for debugging (invisible to user)
-      console.log("Win/Loss History:", winLossHistory);
-    }
-
-    // Check for three consecutive losses
-    function checkThreeConsecutiveLosses() {
-      if (winLossHistory.length < 3) return false;
-      
-      // Check if last 3 predictions were losses
-      return !winLossHistory[0].isWin && 
-             !winLossHistory[1].isWin && 
-             !winLossHistory[2].isWin;
     }
 
     // Create grouped data from dataset
@@ -1339,8 +1345,8 @@
     }
 
     // Get opposite prediction
-    function getOppositePrediction(prediction, isColorPrediction) {
-      if (isColorPrediction) {
+    function getOppositePrediction(prediction, predictionType) {
+      if (predictionType === 'color') {
         return prediction === "GREEN" ? "RED" : "GREEN";
       } else {
         return prediction === "BIG" ? "SMALL" : "BIG";
