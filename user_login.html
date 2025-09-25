@@ -1,52 +1,355 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        body {font-family: Arial; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;}
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            animation: gradientShift 10s ease infinite;
+            background-size: 200% 200%;
+        }
 
-        .login-box {background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 320px; text-align: center;}
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        input {width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;}
+        .login-container {
+            display: flex;
+            width: 900px;
+            max-width: 95%;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
 
-        button {width: 100%; padding: 12px; background: #1877f2; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .error {color: red; margin-top: 10px;}
+        .login-left {
+            flex: 1;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
 
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: pulse 8s infinite linear;
+        }
+
+        @keyframes pulse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .login-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .features i {
+            margin-right: 10px;
+            color: #4cc9f0;
+            font-size: 1.2rem;
+        }
+
+        .login-right {
+            flex: 1;
+            background: white;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-box {
+            width: 100%;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .login-box h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #f9f9f9;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+            background-color: white;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            transition: color 0.3s;
+        }
+
+        .input-group input:focus + i {
+            color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .login-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(231, 76, 60, 0.1);
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .contact-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .phone-btn {
+            background: linear-gradient(to right, #25d366, #128c7e);
+            color: white;
+        }
+
+        .telegram-btn {
+            background: linear-gradient(to right, #0088cc, #005f8c);
+            color: white;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-btn i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .login-left, .login-right {
+                padding: 30px 25px;
+            }
+            
+            .contact-buttons {
+                flex-direction: column;
+            }
+            
+            .contact-btn {
+                margin: 5px 0;
+            }
+        }
     </style>
-
 </head>
-
 <body>
-
-    <div class="login-box">
-
-        <h2>User Login</h2>
-
-        <input type="text" id="accessKey" placeholder="Enter Access Key">
-
-        <button onclick="login()">Login</button>
-
-        <div id="error" class="error"></div>
-
+    <div class="login-container">
+        <div class="login-left">
+            
+          
+            
+            <ul class="features">
+                <li><i class="fas fa-shield-alt"></i> Secure authentication system</li>
+                <li><i class="fas fa-bolt"></i> Fast and reliable access</li>
+                <li><i class="fas fa-user-check"></i> One account for all services</li>
+                <li><i class="fas fa-headset"></i> 24/7 customer support</li>
+            </ul>
+        </div>
+        
+        <div class="login-right">
+            <div class="login-box">
+                <h2>User Login</h2>
+                
+                <div class="input-group">
+                    <i class="fas fa-key"></i>
+                    <input type="text" id="accessKey" placeholder="Enter Access Key">
+                </div>
+                
+                <button class="login-btn" onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                
+                <div id="error" class="error"></div>
+                
+                <div class="contact-buttons">
+                    <a href="tel:01876685711" class="contact-btn phone-btn">
+                        <i class="fas fa-phone"></i> Call Us
+                    </a>
+                    <a href="https://t.me/md_nayeem_vip_hack" target="_blank" class="contact-btn telegram-btn">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-
-
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-
     <script>
-
         // Firebase config
-
-                const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
             authDomain: "nagydbushklams.firebaseapp.com",
             databaseURL: "https://nagydbushklams-default-rtdb.firebaseio.com",
@@ -56,142 +359,113 @@
             appId: "676867467001:web:119605015d28a9b9cf2428"
         };
 
-
-
         // Initialize Firebase
-
         firebase.initializeApp(firebaseConfig);
-
         const database = firebase.database();
-
         const keysRef = database.ref('000000000000000000000000');
 
-
-
         // Generate device ID
-
         function getDeviceId() {
-
             let deviceId = localStorage.getItem('deviceId');
-
             if (!deviceId) {
-
                 deviceId = 'd-' + Math.random().toString(36).substr(2, 9);
-
                 localStorage.setItem('deviceId', deviceId);
-
             }
-
             return deviceId;
-
         }
 
-
-
-        // Login
-
+        // Login function
         function login() {
-
             const accessKey = document.getElementById('accessKey').value.trim();
-
             const deviceId = getDeviceId();
-
+            const errorDiv = document.getElementById('error');
             
-
+            // Reset error message
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
             if (!accessKey) {
-
-                document.getElementById('error').textContent = "Please enter access key";
-
+                errorDiv.textContent = "Please enter access key";
+                errorDiv.style.display = 'block';
                 return;
-
             }
-
             
-
+            // Show loading state
+            const loginBtn = document.querySelector('.login-btn');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            loginBtn.disabled = true;
+            
             keysRef.child(accessKey).once('value', snapshot => {
-
                 const keyData = snapshot.val();
-
                 
-
+                // Reset button
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+                
                 if (!keyData) {
-
-                    document.getElementById('error').textContent = "Invalid access key";
-
+                    errorDiv.textContent = "Invalid access key";
+                    errorDiv.style.display = 'block';
                     return;
-
                 }
-
                 
-
                 // Check if key is already used by another device
-
                 if (keyData.deviceId && keyData.deviceId !== deviceId) {
-
-                    document.getElementById('error').textContent = "This key is already used on another device";
-
+                    errorDiv.textContent = "This key is already used on another device";
+                    errorDiv.style.display = 'block';
                     return;
-
                 }
-
                 
-
                 // Check if key is expired
-
                 if (keyData.expiresAt < Date.now()) {
-
-                    document.getElementById('error').textContent = "This key has expired";
-
+                    errorDiv.textContent = "This key has expired";
+                    errorDiv.style.display = 'block';
                     return;
-
                 }
-
                 
-
                 // Check if key is inactive
-
                 if (!keyData.isActive) {
-
-                    document.getElementById('error').textContent = "This key is deactivated";
-
+                    errorDiv.textContent = "This key is deactivated";
+                    errorDiv.style.display = 'block';
                     return;
-
                 }
-
                 
-
                 // Mark key as used
-
                 keysRef.child(accessKey).update({
-
                     used: true,
-
                     deviceId: deviceId
-
                 });
-
                 
-
                 // Store login info
-
                 localStorage.setItem('userLoggedIn', 'true');
-
                 localStorage.setItem('accessKey', accessKey);
-
                 localStorage.setItem('expiresAt', keyData.expiresAt);
-
                 
-
-                // Redirect to user panel
-
-                window.location.href = "index.html";
-
+                // Success animation
+                loginBtn.innerHTML = '<i class="fas fa-check"></i> Success!';
+                loginBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
+                
+                // Redirect to user panel after a short delay
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1000);
+            }).catch(error => {
+                // Reset button on error
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+                
+                errorDiv.textContent = "An error occurred. Please try again.";
+                errorDiv.style.display = 'block';
+                console.error("Firebase error:", error);
             });
-
         }
 
+        // Add enter key support
+        document.getElementById('accessKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
     </script>
-
 </body>
-
 </html>
