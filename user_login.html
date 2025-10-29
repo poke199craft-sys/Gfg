@@ -3,350 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Chat System Box</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            animation: gradientShift 10s ease infinite;
-            background-size: 200% 200%;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .login-container {
-            display: flex;
-            width: 900px;
-            max-width: 95%;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-left {
-            flex: 1;
-            background: linear-gradient(45deg, #1a1a2e, #16213e);
-            color: white;
-            padding: 50px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
+            font-family: Arial, sans-serif;
+            height: 100vh;
             overflow: hidden;
         }
-
-        .login-left::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            animation: pulse 8s infinite linear;
-        }
-
-        @keyframes pulse {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .login-left h1 {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-left p {
-            font-size: 1.1rem;
-            opacity: 0.8;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .features {
-            list-style: none;
-            margin-top: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .features li {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .features i {
-            margin-right: 10px;
-            color: #4cc9f0;
-            font-size: 1.2rem;
-        }
-
-        .login-right {
-            flex: 1;
-            background: white;
-            padding: 50px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-box {
+        
+        /* WebView Background */
+        #webview {
             width: 100%;
+            height: 100vh;
+            border: none;
         }
-
-        .login-box h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 2rem;
-            position: relative;
-        }
-
-        .login-box h2::after {
-            content: '';
-            display: block;
+        
+        /* Floating Chat Button */
+        #chatButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             width: 60px;
-            height: 4px;
-            background: linear-gradient(to right, #667eea, #764ba2);
-            margin: 10px auto;
-            border-radius: 2px;
+            height: 60px;
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-size: 24px;
+            transition: transform 0.3s;
         }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 25px;
+        
+        #chatButton:hover {
+            transform: scale(1.1);
         }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px 15px 15px 45px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background-color: #f9f9f9;
+        
+        /* Chat Box */
+        #chatBox {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            resize: both;
+            min-width: 300px;
+            min-height: 400px;
+            max-width: 90vw;
+            max-height: 80vh;
         }
-
-        .input-group input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            outline: none;
-            background-color: white;
-        }
-
-        .input-group i {
+        
+        /* Resize Handle */
+        .resize-handle {
             position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            transition: color 0.3s;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            cursor: nw-resize;
+            z-index: 10;
         }
-
-        .input-group input:focus + i {
-            color: #667eea;
+        
+        /* Chat Header */
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
         }
-
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(to right, #667eea, #764ba2);
+        
+        .time-display {
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        /* Interval Selector */
+        .interval-selector {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+        
+        .interval-selector:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Chat Messages */
+        #chatMessages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+        
+        .msg {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .assistant {
+            background: #e9ecef;
+            color: black;
+        }
+        
+        .loading {
+            background: #e9ecef;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots:after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        /* Chat Input */
+        .chat-input {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 5px;
+        }
+        
+        #messageInput {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;
+            max-height: 100px;
+        }
+        
+        .chat-input button {
+            background: #007bff;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-            position: relative;
-            overflow: hidden;
         }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.3);
+        
+        .chat-input button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-btn::after {
-            content: '';
+        
+        /* Forms Popup */
+        #formsPopup {
+            display: none;
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%);
-            transform-origin: 50% 50%;
-        }
-
-        .login-btn:focus:not(:active)::after {
-            animation: ripple 1s ease-out;
-        }
-
-        @keyframes ripple {
-            0% {
-                transform: scale(0, 0);
-                opacity: 0.5;
-            }
-            100% {
-                transform: scale(20, 20);
-                opacity: 0;
-            }
-        }
-
-        .error {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            background-color: rgba(231, 76, 60, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1002;
+            width: 280px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .overlay {
             display: none;
-            animation: shake 0.5s;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 1001;
         }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        
+        .form-item {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+            cursor: pointer;
+            background: #f8f9fa;
+            transition: background 0.2s;
         }
-
-        .contact-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
+        
+        .form-item:hover {
+            background: #e9ecef;
         }
-
-        .contact-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            flex: 1;
-            margin: 0 5px;
+        
+        /* API Status Indicator */
+        .api-status {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #28a745;
         }
-
-        .phone-btn {
-            background: linear-gradient(to right, #25d366, #128c7e);
-            color: white;
+        
+        .api-status.error {
+            background: #dc3545;
         }
-
-        .telegram-btn {
-            background: linear-gradient(to right, #0088cc, #005f8c);
-            color: white;
+        
+        .api-status.warning {
+            background: #ffc107;
         }
-
-        .contact-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .contact-btn i {
-            margin-right: 8px;
-            font-size: 1.2rem;
-        }
-
-        @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .login-left, .login-right {
-                padding: 30px 25px;
-            }
-            
-            .contact-buttons {
-                flex-direction: column;
-            }
-            
-            .contact-btn {
-                margin: 5px 0;
-            }
+        
+        /* API Key Info */
+        .api-info {
+            position: absolute;
+            top: 10px;
+            right: 65px;
+            font-size: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-left">
-            
-          
-            
-            <ul class="features">
-                <li><i class="fas fa-shield-alt"></i> Secure authentication system</li>
-                <li><i class="fas fa-bolt"></i> Fast and reliable access</li>
-                <li><i class="fas fa-user-check"></i> One account for all services</li>
-                <li><i class="fas fa-headset"></i> 24/7 customer support</li>
-            </ul>
+    <!-- WebView Background -->
+    <iframe id="webview" src="https://hgnice.cc/#/register?invitationCode=81132359432" frameborder="0"></iframe>
+    
+    <!-- Floating Chat Button -->
+    <div id="chatButton">&#128172;</div>
+    
+    <!-- Chat Box -->
+    <div id="chatBox">
+        <div class="chat-header" id="chatHeader">
+            <div class="interval-selector" id="intervalSelector">30s</div>
+            <div class="time-display" id="timeDisplay">00d 00h 00m 00s</div>
+            <div class="api-info" id="apiInfo">API: 1</div>
+            <div class="api-status" id="apiStatus"></div>
+            <button class="close-btn" id="closeChat">&times;</button>
         </div>
         
-        <div class="login-right">
-            <div class="login-box">
-                <h2>User Login</h2>
-                
-                <div class="input-group">
-                    <i class="fas fa-key"></i>
-                    <input type="text" id="accessKey" placeholder="Enter Access Key">
-                </div>
-                
-                <button class="login-btn" onclick="login()">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-                
-                <div id="error" class="error"></div>
-                
-                <div class="contact-buttons">
-                    <a href="tel:01876685711" class="contact-btn phone-btn">
-                        <i class="fas fa-phone"></i> Call Us
-                    </a>
-                    <a href="https://t.me/md_nayeem_vip_hack" target="_blank" class="contact-btn telegram-btn">
-                        <i class="fab fa-telegram"></i> Telegram
-                    </a>
-                </div>
-            </div>
+        <div id="chatMessages"></div>
+        
+        <div class="chat-input">
+            <textarea id="messageInput" placeholder="Type message..." rows="1"></textarea>
+            <button id="sendMessage">Send</button>
+            <button id="formsBtn">Forms</button>
         </div>
+        
+        <div class="resize-handle"></div>
+        
+        <div id="formsPopup">
+            <h4>Available Forms</h4>
+            <div id="formsList"></div>
+            <button id="closeForms" style="margin-top: 10px; width: 100%;">Close</button>
+        </div>
+        
+        <div class="overlay" id="overlay"></div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
     <script>
         // Firebase config
         const firebaseConfig = {
@@ -359,10 +328,268 @@
             appId: "676867467001:web:119605015d28a9b9cf2428"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const keysRef = database.ref('000000000000000000000000');
+        const keysRef = database.ref('YOU88888888');
+
+        // Gemini API configuration with multiple keys for rotation
+        const geminiApiKeys = [
+            "AIzaSyCrDb4bRMLS76SRh7-7Pc4n-NjevvDiDck",
+            "AIzaSyDksFb5FTjInd4470pKxqDkiC45K8V1rdY",
+            "AIzaSyDSLqqYUrkS0gisHQa8N21PIHXTHJoGdI4",
+            "AIzaSyA_H3RpJNURKzQlZHktzW-EN8Vo1vd8xVY",
+            "AIzaSyBbyGk2qxnS8yNkFkEgsXg53Vndxtq41Pg",
+            "AIzaSyAvjBYuNcZKQ9acvL-sjZ2PI0pt2uBKrbI",
+            "AIzaSyD7XeQGl-rEEDfTCMfkjG-6U6DkLFxK1vE",
+            "AIzaSyAndKuYTM2_8xDDGfOspm3uHE4yWtRCNy0",
+            "AIzaSyB_lKfDvMZGBgEtr0WOA9aH8gzejWi-34g",
+            "AIzaSyDkl70hwarRJYG7FteEl006BPcpQVGzpM4",
+            "AIzaSyBf5zd5kf3uU1ccPWRpqBhUP8VNjWRmNZ0",
+            "AIzaSyDXP6CMHXglbK_eyWAKSlTPm0MaDl-9frg",
+            "AIzaSyAmw64X4yW92cXgp3VlKc_c5a7bskblaAE",
+            "AIzaSyDsdRHTW1jU0nKgr78v9VEi2AJTuuJnrT4",
+            "AIzaSyBd76gFgbPTt4e1eyN53C7yVzfn5vw2LDM",
+            "AIzaSyCXozB45uxTRwHXJlzmhayIebfslu44i58",
+            "AIzaSyBW2R0miQYGto4laVeQf9E-MnNd4HPZ3fU",
+            "AIzaSyBSb0zL4J7Z2_j7iBPc1ElqseZ-OByUWfE",
+            "AIzaSyDccxOegEdKKjuB_NjcVzALAj3ibx8N9fY",
+            "AIzaSyADyEz2P9D0uzDt9vs2Q7KGAwUnXBdUKvI",
+            "AIzaSyAqJU_CGmneMu9qwr86CBFDQlm9a1zmMA4",
+            "AIzaSyC-rNpa-LiNDdMgOCpoKZZp49wmX-xE_Wg",
+            "AIzaSyBkKLfUYesRv67x2D8d_OhYyEJ6O4XPvI0",
+            "AIzaSyDHmowydCKC7nSykQHnf7rD1aYRF7Fj7l8"
+        ];
+        
+        const geminiModel = "gemini-2.0-flash";
+        let currentApiKeyIndex = 0;
+        let failedKeys = new Set(); // Track failed keys to avoid retrying them
+        let workingKeys = new Set(); // Track working keys
+        let apiKeyStatus = {}; // Track status of each API key
+
+        // DOM elements
+        const chatButton = document.getElementById('chatButton');
+        const chatBox = document.getElementById('chatBox');
+        const closeChat = document.getElementById('closeChat');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
+        const formsBtn = document.getElementById('formsBtn');
+        const formsPopup = document.getElementById('formsPopup');
+        const overlay = document.getElementById('overlay');
+        const closeFormsBtn = document.getElementById('closeForms');
+        const formsList = document.getElementById('formsList');
+        const chatHeader = document.getElementById('chatHeader');
+        const resizeHandle = document.querySelector('.resize-handle');
+        const apiStatus = document.getElementById('apiStatus');
+        const intervalSelector = document.getElementById('intervalSelector');
+        const apiInfo = document.getElementById('apiInfo');
+
+        // Time interval configuration
+        const intervals = [
+            { name: '30s', url: 'https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json' },
+            { name: '1M', url: 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json' },
+            { name: '3M', url: 'https://draw.ar-lottery01.com/WinGo/WinGo_3M/GetHistoryIssuePage.json' },
+            { name: '5M', url: 'https://draw.ar-lottery01.com/WinGo/WinGo_5M/GetHistoryIssuePage.json' }
+        ];
+        let currentIntervalIndex = 0;
+
+        let messages = [
+            { role: 'system', content: 'You are helpful.' }
+        ];
+
+        // Initialize API key status
+        function initializeApiKeyStatus() {
+            geminiApiKeys.forEach((key, index) => {
+                apiKeyStatus[index] = 'unknown'; // unknown, working, failed
+            });
+        }
+
+        // Function to get current API key
+        function getCurrentApiKey() {
+            return geminiApiKeys[currentApiKeyIndex];
+        }
+
+        // Function to test an API key
+        async function testApiKey(keyIndex) {
+            const testApiKey = geminiApiKeys[keyIndex];
+            const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
+            
+            try {
+                const res = await fetch(`${geminiApiUrl}?key=${testApiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: "Hello" }],
+                            role: 'user'
+                        }]
+                    })
+                });
+
+                if (res.status === 200) {
+                    apiKeyStatus[keyIndex] = 'working';
+                    workingKeys.add(keyIndex);
+                    failedKeys.delete(keyIndex);
+                    return true;
+                } else {
+                    apiKeyStatus[keyIndex] = 'failed';
+                    failedKeys.add(keyIndex);
+                    workingKeys.delete(keyIndex);
+                    return false;
+                }
+            } catch (error) {
+                apiKeyStatus[keyIndex] = 'failed';
+                failedKeys.add(keyIndex);
+                workingKeys.delete(keyIndex);
+                return false;
+            }
+        }
+
+        // Function to find the next working API key
+        async function findWorkingApiKey() {
+            // First, try to use a known working key
+            if (workingKeys.size > 0) {
+                const workingKeyIndex = Array.from(workingKeys)[0];
+                currentApiKeyIndex = workingKeyIndex;
+                updateApiStatus();
+                return true;
+            }
+            
+            // If no working keys are known, test keys in sequence
+            for (let i = 0; i < geminiApiKeys.length; i++) {
+                if (!failedKeys.has(i) || apiKeyStatus[i] === 'unknown') {
+                    const isWorking = await testApiKey(i);
+                    if (isWorking) {
+                        currentApiKeyIndex = i;
+                        updateApiStatus();
+                        return true;
+                    }
+                }
+            }
+            
+            // If all keys are failed, try testing failed keys again (in case they recovered)
+            for (let i = 0; i < geminiApiKeys.length; i++) {
+                const isWorking = await testApiKey(i);
+                if (isWorking) {
+                    currentApiKeyIndex = i;
+                    updateApiStatus();
+                    return true;
+                }
+            }
+            
+            // No working keys found
+            updateApiStatus();
+            return false;
+        }
+
+        // Function to rotate to next API key
+        async function rotateApiKey() {
+            console.log(`API key ${currentApiKeyIndex} failed. Rotating to next key...`);
+            
+            // Mark current key as failed
+            apiKeyStatus[currentApiKeyIndex] = 'failed';
+            failedKeys.add(currentApiKeyIndex);
+            workingKeys.delete(currentApiKeyIndex);
+            
+            // Find a working key
+            const foundWorkingKey = await findWorkingApiKey();
+            
+            if (foundWorkingKey) {
+                console.log(`Successfully rotated to API key index: ${currentApiKeyIndex}`);
+                addMessage('assistant', `API key rotated to key ${currentApiKeyIndex + 1}. Please try again.`);
+            } else {
+                console.log('No working API keys found');
+                addMessage('assistant', 'All API keys are currently unavailable. Please try again later.');
+            }
+        }
+
+        // Function to update API status indicator
+        function updateApiStatus() {
+            apiInfo.textContent = `API: ${currentApiKeyIndex + 1}`;
+            
+            if (workingKeys.size === geminiApiKeys.length) {
+                apiStatus.style.background = '#28a745'; // Green for all good
+            } else if (workingKeys.size > geminiApiKeys.length / 2) {
+                apiStatus.style.background = '#28a745'; // Green for mostly good
+            } else if (workingKeys.size > 0) {
+                apiStatus.style.background = '#ffc107'; // Yellow for warning
+            } else {
+                apiStatus.style.background = '#dc3545'; // Red for error
+            }
+        }
+
+        // Function to cycle through intervals
+        function cycleInterval() {
+            currentIntervalIndex = (currentIntervalIndex + 1) % intervals.length;
+            intervalSelector.textContent = intervals[currentIntervalIndex].name;
+            
+            // Add a visual feedback for the change
+            intervalSelector.style.background = 'rgba(255,255,255,0.4)';
+            setTimeout(() => {
+                intervalSelector.style.background = 'rgba(255,255,255,0.2)';
+            }, 200);
+        }
+
+        // Resize functionality
+        let isResizing = false;
+        let startX, startY, startWidth, startHeight;
+
+        resizeHandle.addEventListener('mousedown', initResize);
+
+        function initResize(e) {
+            isResizing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = parseInt(document.defaultView.getComputedStyle(chatBox).width, 10);
+            startHeight = parseInt(document.defaultView.getComputedStyle(chatBox).height, 10);
+            
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+            
+            e.preventDefault();
+        }
+
+        function resize(e) {
+            if (!isResizing) return;
+            
+            const width = startWidth + (e.clientX - startX);
+            const height = startHeight + (e.clientY - startY);
+            
+            // Apply minimum and maximum size constraints
+            if (width >= 300 && width <= window.innerWidth * 0.9) {
+                chatBox.style.width = width + 'px';
+            }
+            
+            if (height >= 400 && height <= window.innerHeight * 0.8) {
+                chatBox.style.height = height + 'px';
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+        }
+
+        // Double click to toggle chat box
+        let lastClickTime = 0;
+        document.addEventListener('dblclick', function(e) {
+            const currentTime = new Date().getTime();
+            const timeSinceLastClick = currentTime - lastClickTime;
+            
+            if (timeSinceLastClick < 300) { // Double click detected
+                if (chatBox.style.display === 'flex') {
+                    closeChatBox();
+                } else {
+                    openChatBox();
+                }
+            }
+            
+            lastClickTime = currentTime;
+        });
 
         // Generate device ID
         function getDeviceId() {
@@ -374,59 +601,73 @@
             return deviceId;
         }
 
+        // Check login status
+        function checkLoginStatus() {
+            const userLoggedIn = localStorage.getItem('userLoggedIn');
+            const expiresAt = localStorage.getItem('expiresAt');
+            
+            if (userLoggedIn && expiresAt && parseInt(expiresAt) > Date.now()) {
+                return true;
+            }
+            return false;
+        }
+
+        // Show login popup
+        function showLoginPopup() {
+            const loginHtml = `
+                <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:1002;">
+                    <div style="background:white; padding:20px; border-radius:10px; width:300px; text-align:center;">
+                        <h3>Login Required</h3>
+                        <input type="text" id="accessKeyInput" placeholder="Enter Access Key" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:5px;">
+                        <button id="loginBtn" style="width:100%; padding:10px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;">Login</button>
+                        <div id="loginError" style="color:red; margin-top:10px;"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', loginHtml);
+            
+            document.getElementById('loginBtn').addEventListener('click', login);
+            document.getElementById('accessKeyInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') login();
+            });
+        }
+
         // Login function
         function login() {
-            const accessKey = document.getElementById('accessKey').value.trim();
+            const accessKeyInput = document.getElementById('accessKeyInput');
+            const loginError = document.getElementById('loginError');
+            const accessKey = accessKeyInput.value.trim();
             const deviceId = getDeviceId();
-            const errorDiv = document.getElementById('error');
-            
-            // Reset error message
-            errorDiv.style.display = 'none';
-            errorDiv.textContent = '';
             
             if (!accessKey) {
-                errorDiv.textContent = "Please enter access key";
-                errorDiv.style.display = 'block';
+                loginError.textContent = "Please enter access key";
                 return;
             }
-            
-            // Show loading state
-            const loginBtn = document.querySelector('.login-btn');
-            const originalText = loginBtn.innerHTML;
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-            loginBtn.disabled = true;
             
             keysRef.child(accessKey).once('value', snapshot => {
                 const keyData = snapshot.val();
                 
-                // Reset button
-                loginBtn.innerHTML = originalText;
-                loginBtn.disabled = false;
-                
                 if (!keyData) {
-                    errorDiv.textContent = "Invalid access key";
-                    errorDiv.style.display = 'block';
+                    loginError.textContent = "Invalid access key";
                     return;
                 }
                 
                 // Check if key is already used by another device
                 if (keyData.deviceId && keyData.deviceId !== deviceId) {
-                    errorDiv.textContent = "This key is already used on another device";
-                    errorDiv.style.display = 'block';
+                    loginError.textContent = "This key is already used on another device";
                     return;
                 }
                 
                 // Check if key is expired
                 if (keyData.expiresAt < Date.now()) {
-                    errorDiv.textContent = "This key has expired";
-                    errorDiv.style.display = 'block';
+                    loginError.textContent = "This key has expired";
                     return;
                 }
                 
                 // Check if key is inactive
                 if (!keyData.isActive) {
-                    errorDiv.textContent = "This key is deactivated";
-                    errorDiv.style.display = 'block';
+                    loginError.textContent = "This key is deactivated";
                     return;
                 }
                 
@@ -441,31 +682,257 @@
                 localStorage.setItem('accessKey', accessKey);
                 localStorage.setItem('expiresAt', keyData.expiresAt);
                 
-                // Success animation
-                loginBtn.innerHTML = '<i class="fas fa-check"></i> Success!';
-                loginBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
+                // Remove login popup
+                document.querySelector('div[style*="position:fixed; top:0"]').remove();
                 
-                // Redirect to user panel after a short delay
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 1000);
-            }).catch(error => {
-                // Reset button on error
-                loginBtn.innerHTML = originalText;
-                loginBtn.disabled = false;
-                
-                errorDiv.textContent = "An error occurred. Please try again.";
-                errorDiv.style.display = 'block';
-                console.error("Firebase error:", error);
+                // Start countdown timer
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
             });
         }
 
-        // Add enter key support
-        document.getElementById('accessKey').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                login();
+        // Countdown timer
+        function updateCountdown() {
+            const expiresAt = localStorage.getItem('expiresAt');
+            if (!expiresAt) return;
+            
+            const now = Date.now();
+            const remaining = parseInt(expiresAt) - now;
+            
+            if (remaining <= 0) {
+                timeDisplay.textContent = "EXPIRED";
+                logout();
+                return;
             }
+            
+            const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            timeDisplay.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('userLoggedIn');
+            localStorage.removeItem('accessKey');
+            localStorage.removeItem('expiresAt');
+            closeChatBox();
+        }
+
+        // Chat functions
+        function addMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + role;
+            div.textContent = content;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
+        }
+
+        function addLoadingMessage() {
+            const div = document.createElement('div');
+            div.className = 'msg loading';
+            div.innerHTML = `<span class="loading-dots"></span>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage(text) {
+            if (!text) return;
+
+            // First show user message immediately
+            addMessage('user', text);
+            messages.push({ role: 'user', content: text });
+
+            // Then show loading on assistant side (left side)
+            const loadingMsg = addLoadingMessage();
+
+            try {
+                // Format messages for Gemini API
+                const contents = messages.map(msg => {
+                    return {
+                        parts: [{ text: msg.content }],
+                        role: msg.role === 'user' ? 'user' : 'model'
+                    };
+                });
+
+                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
+                const currentApiKey = getCurrentApiKey();
+                
+                const res = await fetch(`${geminiApiUrl}?key=${currentApiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: contents
+                    })
+                });
+
+                // Check if the API key is invalid
+                if (res.status === 403 || res.status === 401) {
+                    // Rotate to next API key
+                    await rotateApiKey();
+                    
+                    // Remove loading message
+                    loadingMsg.remove();
+                    return;
+                }
+
+                // Check for other API errors
+                if (!res.ok) {
+                    throw new Error(`API error: ${res.status} ${res.statusText}`);
+                }
+
+                const data = await res.json();
+                
+                if (!data.candidates || !data.candidates[0]) {
+                    throw new Error('Invalid response from API');
+                }
+                
+                const reply = data.candidates[0].content.parts[0].text || 'No response.';
+                
+                // Mark current key as working
+                apiKeyStatus[currentApiKeyIndex] = 'working';
+                workingKeys.add(currentApiKeyIndex);
+                failedKeys.delete(currentApiKeyIndex);
+                updateApiStatus();
+                
+                // Remove loading message and add actual response
+                loadingMsg.remove();
+                addMessage('assistant', reply);
+                messages.push({ role: 'assistant', content: reply });
+            } catch (err) {
+                loadingMsg.remove();
+                
+                // Check if it's an API key error
+                if (err.message.includes('API') || err.message.includes('403') || err.message.includes('401')) {
+                    // Rotate to next API key
+                    await rotateApiKey();
+                } else {
+                    addMessage('assistant', 'Error: ' + err.message);
+                }
+            }
+        }
+
+        async function getMarketData() {
+            try {
+                const currentInterval = intervals[currentIntervalIndex];
+                const res = await fetch(`${currentInterval.url}?ts=${Date.now()}`);
+                const data = await res.json();
+                const list = data?.data?.list || [];
+                if (!list.length) return 'No data';
+                const numbers = list.slice(0, 8).map(item => item.number);
+                return numbers.join(', ');
+            } catch {
+                return 'Error';
+            }
+        }
+
+        function loadForms() {
+            formsList.innerHTML = '';
+            database.ref('forms').once('value').then(snapshot => {
+                const forms = snapshot.val();
+                if (!forms) {
+                    formsList.innerHTML = '<p>No forms available</p>';
+                    return;
+                }
+                
+                Object.keys(forms).forEach(key => {
+                    const form = forms[key];
+                    const formItem = document.createElement('div');
+                    formItem.className = 'form-item';
+                    formItem.innerHTML = `<strong>${form.title}</strong>`;
+                    
+                    formItem.addEventListener('click', async () => {
+                        hideForms();
+                        const marketData = await getMarketData();
+                        const message = `${form.content} ${marketData}`;
+                        sendMessage(message);
+                    });
+                    
+                    formsList.appendChild(formItem);
+                });
+            });
+        }
+
+        function showForms() {
+            loadForms();
+            formsPopup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+        
+        function hideForms() {
+            formsPopup.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        function sendUserMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            messageInput.value = '';
+            sendMessageBtn.disabled = true;
+            
+            sendMessage(text).finally(() => {
+                sendMessageBtn.disabled = false;
+            });
+        }
+
+        function openChatBox() {
+            if (!checkLoginStatus()) {
+                showLoginPopup();
+                return;
+            }
+            
+            chatBox.style.display = 'flex';
+            updateCountdown();
+        }
+
+        function closeChatBox() {
+            chatBox.style.display = 'none';
+        }
+
+        // Event Listeners
+        chatButton.addEventListener('click', openChatBox);
+        closeChat.addEventListener('click', closeChatBox);
+        
+        sendMessageBtn.addEventListener('click', sendUserMessage);
+        
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendUserMessage();
+            }
+        });
+        
+        formsBtn.addEventListener('click', showForms);
+        closeFormsBtn.addEventListener('click', hideForms);
+        overlay.addEventListener('click', hideForms);
+        
+        // Interval selector click event
+        intervalSelector.addEventListener('click', cycleInterval);
+
+        // Auto resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Check if user is already logged in on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (checkLoginStatus()) {
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            }
+            
+            // Initialize API key status and find a working key
+            initializeApiKeyStatus();
+            await findWorkingApiKey();
         });
     </script>
 </body>
-</html>
+        </html>
