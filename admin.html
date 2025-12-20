@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <style>
+        body { background-color: #0d1117; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #30363d; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 255, 0, 0.1); }
+        h2 { text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; color: #58a6ff; }
+        label { font-size: 14px; color: #8b949e; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; }
+        button { background: #238636; cursor: pointer; font-weight: bold; border: none; transition: 0.3s; }
+        button:hover { background: #2ea043; }
+        button.delete-btn { background: #da3633; width: auto; padding: 5px 12px; font-size: 12px; }
+        button.delete-btn:hover { background: #f85149; }
+        .key-list { margin-top: 20px; }
+        .key-item { background: #161b22; padding: 15px; border: 1px solid #30363d; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; }
+        #login-section { display: flex; flex-direction: column; height: 90vh; justify-content: center; align-items: center; }
+        #dashboard-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="login-section">
+    <div style="width: 320px; text-align: center;" class="container">
+        <h2>ADMIN ACCESS</h2>
+        <input type="password" id="admin-pass" placeholder="Enter Admin Password">
+        <button onclick="adminLogin()">LOGIN</button>
+    </div>
+</div>
+
+<div id="dashboard-section">
+    <div class="container">
+        <h2>GENERATE LICENSE KEY</h2>
+        
+        <label>Key Name (Optional):</label>
+        <input type="text" id="key-name" placeholder="Leave empty for auto-generated">
+        
+        <label>Validity (Days):</label>
+        <input type="number" id="days" placeholder="e.g. 1, 7, 30" value="1" min="1">
+        
+        <label>Max Devices Allowed:</label>
+        <input type="number" id="max-devices" placeholder="e.g. 1, 100" value="1" min="1">
+        
+        <button onclick="generateKey()">CREATE KEY</button>
+
+        <hr style="border: 0.5px solid #30363d; margin: 20px 0;">
+        
+        <h2>ACTIVE KEYS</h2>
+        <div id="keys-container" class="key-list">
+            <p style="text-align:center; color: #8b949e;">Loading keys...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyB9dPVoQVjVlu-xWpItGlA_L4vEC7rZ1M8",
+        authDomain: "xlsx99-20307.firebaseapp.com",
+        databaseURL: "https://xlsx99-20307-default-rtdb.firebaseio.com",
+        projectId: "xlsx99-20307",
+        storageBucket: "xlsx99-20307.firebasestorage.app",
+        messagingSenderId: "1015995652282",
+        appId: "1:1015995652282:web:98605a0197eb50f0fb0a83"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const keysRef = db.ref('licenses');
+
+    // --- LOGIN LOGIC ---
+    function adminLogin() {
+        const pass = document.getElementById('admin-pass').value;
+        // পাসওয়ার্ড 'admin123' ব্যবহার করা হয়েছে
+        if(pass === "admin123") {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            loadKeys();
+        } else {
+            alert("❌ Incorrect Password!");
+        }
+    }
+
+    // --- GENERATE KEY LOGIC ---
+    function generateKey() {
+        const customName = document.getElementById('key-name').value.trim();
+        const days = parseInt(document.getElementById('days').value);
+        const maxDev = parseInt(document.getElementById('max-devices').value);
+
+        if(!days || days <= 0 || !maxDev || maxDev <= 0) {
+            return alert("⚠️ Please enter valid days and device limits.");
+        }
+
+        // Generate Random Key if name is empty
+        const keyString = customName || 'KEY-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+        const expiryTime = Date.now() + (days * 24 * 60 * 60 * 1000);
+
+        keysRef.child(keyString).set({
+            expiry: expiryTime,
+            maxDevices: maxDev,
+            usedDevices: 0,
+            status: 'active',
+            createdAt: new Date().toLocaleString()
+        }).then(() => {
+            alert("✅ Key Created Successfully: " + keyString);
+            document.getElementById('key-name').value = '';
+        }).catch((err) => {
+            alert("❌ Error: " + err.message);
+        });
+    }
+
+    // --- LOAD KEYS REALTIME ---
+    function loadKeys() {
+        keysRef.on('value', (snapshot) => {
+            const container = document.getElementById('keys-container');
+            container.innerHTML = '';
+            const data = snapshot.val();
+
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    const info = data[key];
+                    // Calculate remaining time
+                    const timeLeftMs = info.expiry - Date.now();
+                    const daysLeft = Math.max(0, Math.floor(timeLeftMs / (1000 * 60 * 60 * 24)));
+                    const hoursLeft = Math.max(0, Math.floor((timeLeftMs / (1000 * 60 * 60)) % 24));
+
+                    const div = document.createElement('div');
+                    div.className = 'key-item';
+                    div.innerHTML = `
+                        <div>
+                            <strong style="color:#f1e05a; font-size: 16px;">${key}</strong><br>
+                            <small style="color: #8b949e;">
+                                Expiry: ${daysLeft}d ${hoursLeft}h | Devices: ${info.usedDevices || 0}/${info.maxDevices}
+                            </small>
+                        </div>
+                        <button class="delete-btn" onclick="deleteKey('${key}')">DELETE</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = '<p style="text-align:center; color: #8b949e;">No active keys found.</p>';
+            }
+        });
+    }
+
+    // --- DELETE KEY ---
+    function deleteKey(key) {
+        if(confirm(`Are you sure you want to delete ${key}?`)) {
+            keysRef.child(key).remove()
+                .then(() => alert("Key deleted."))
+                .catch(err => alert("Error deleting key."));
+        }
+    }
+</script>
+
+</body>
+  </html>
