@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Customer Service</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .chat-bg { background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-opacity: 0.1; }
+        .message-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Mobile optimization */
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="h-screen flex justify-center items-center bg-gray-100 overflow-hidden">
+
+    <div id="app" class="w-full h-full md:max-w-md md:h-[90vh] md:rounded-2xl bg-white shadow-2xl relative overflow-hidden flex flex-col">
+        <!-- Login & Chat will be injected here -->
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9dPVoQVjVlu-xWpItGlA_L4vEC7rZ1M8",
+            authDomain: "xlsx99-20307.firebaseapp.com",
+            databaseURL: "https://xlsx99-20307-default-rtdb.firebaseio.com",
+            projectId: "xlsx99-20307",
+            storageBucket: "xlsx99-20307.firebasestorage.app",
+            messagingSenderId: "1015995652282",
+            appId: "1:1015995652282:web:98605a0197eb50f0fb0a83"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let uid = localStorage.getItem('user_uid') || '';
+        let selectedCategory = "Wine stick bonus";
+        
+        const categories = [
+            "Wine stick bonus", "Daily salary", "Daily bonus", "Member bonus", 
+            "Demo account", "Fast deposit bonus", "Year End salary", 
+            "VIP Bonus", "Complaint", "Other Issue"
+        ];
+
+        // Auto Login
+        signInAnonymously(auth);
+
+        const appDiv = document.getElementById('app');
+
+        function init() {
+            if (!uid) renderLogin();
+            else renderChat();
+        }
+
+        // --- Login Screen ---
+        function renderLogin() {
+            appDiv.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full p-8 bg-gradient-to-b from-blue-600 to-blue-800 text-white relative">
+                    <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    
+                    <div class="z-10 w-full bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-2xl shadow-xl animate-bounce-slow">
+                        <div class="text-center mb-8">
+                            <div class="bg-white text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
+                                <i class="fa-solid fa-headset"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold tracking-tight">Support Center</h2>
+                            <p class="text-blue-100 text-sm mt-2">Connect with our agents instantly</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs uppercase font-bold tracking-widest text-blue-200 ml-1">Your ID</label>
+                                <input type="number" id="uidInput" class="w-full bg-white/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-blue-200 outline-none focus:bg-white/30 focus:border-white transition text-center font-mono text-lg" placeholder="e.g. 65001">
+                            </div>
+                            <button onclick="window.login()" class="w-full bg-white text-blue-700 py-3.5 rounded-xl font-bold hover:bg-blue-50 transition transform active:scale-95 shadow-lg">
+                                START CHAT <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="absolute bottom-6 text-xs text-blue-300 opacity-60">Secure Connection • 24/7 Support</p>
+                </div>
+            `;
+        }
+
+        // --- Chat Screen ---
+        function renderChat() {
+            appDiv.innerHTML = `
+                <!-- Header -->
+                <div class="bg-white px-4 py-3 shadow-sm border-b flex justify-between items-center z-20">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fa-solid fa-robot text-lg"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-gray-800 text-sm">Customer Support</h2>
+                            <p class="text-[10px] text-gray-400 font-mono">ID: ${uid}</p>
+                        </div>
+                    </div>
+                    <button onclick="window.logout()" class="text-gray-400 hover:text-red-500 transition p-2">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <!-- Category Bar -->
+                <div class="bg-gray-50/90 backdrop-blur border-b py-2 z-10">
+                    <div class="flex overflow-x-auto gap-2 px-4 scrollbar-hide" id="catList">
+                        <!-- Categories -->
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div id="msgContainer" class="flex-1 overflow-y-auto p-4 space-y-4 chat-bg bg-slate-100 scroll-smooth pb-20">
+                    <!-- Dynamic Messages -->
+                </div>
+
+                <!-- Input Area -->
+                <div class="bg-white p-3 border-t safe-bottom z-20">
+                    <div class="flex items-end gap-2 bg-gray-100 rounded-3xl px-4 py-2 border border-gray-200 focus-within:border-blue-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                        <textarea id="msgInput" rows="1" class="flex-1 bg-transparent border-0 outline-none text-sm resize-none py-2 max-h-24" placeholder="Type your message..."></textarea>
+                        <button onclick="window.send()" class="mb-1 text-blue-600 hover:text-blue-700 transition p-1 transform active:scale-90">
+                            <i class="fa-solid fa-paper-plane text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            renderCategories();
+            listenMessages();
+            
+            // Auto resize textarea
+            const tx = document.getElementById('msgInput');
+            tx.addEventListener("input", function(){
+                this.style.height = "auto";
+                this.style.height = (this.scrollHeight) + "px";
+            });
+            // Enter to send
+            tx.addEventListener("keydown", function(e){
+                if(e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    window.send();
+                }
+            });
+        }
+
+        function renderCategories() {
+            const list = document.getElementById('catList');
+            if(!list) return;
+            list.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                const active = selectedCategory === cat;
+                btn.className = `whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-semibold transition border select-none ${
+                    active 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105' 
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                }`;
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    selectedCategory = cat;
+                    renderCategories();
+                    // Focus input after selection
+                    document.getElementById('msgInput')?.focus();
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        function listenMessages() {
+            const q = query(collection(db, "chat_messages"), orderBy("timestamp", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('msgContainer');
+                if(!container) return;
+                
+                // Keep scroll position if not at bottom? For now auto-scroll
+                const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+                
+                container.innerHTML = '';
+                const myMsgs = snapshot.docs.map(d => ({id: d.id, ...d.data()})).filter(m => m.uid === uid);
+
+                if(myMsgs.length === 0) {
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center mt-20 opacity-40">
+                            <i class="fa-regular fa-comments text-5xl mb-2 text-gray-400"></i>
+                            <p class="text-sm text-gray-500">No messages yet.</p>
+                            <p class="text-xs text-gray-400">Select a topic above to start.</p>
+                        </div>
+                    `;
+                }
+
+                let lastDate = null;
+
+                myMsgs.forEach(m => {
+                    // Date Separator
+                    const msgDate = m.timestamp ? new Date(m.timestamp.seconds * 1000).toDateString() : new Date().toDateString();
+                    if(msgDate !== lastDate) {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-center my-4";
+                        div.innerHTML = `<span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-medium">${msgDate}</span>`;
+                        container.appendChild(div);
+                        lastDate = msgDate;
+                    }
+
+                    const isMe = m.sender === 'user';
+                    const time = m.timestamp ? new Date(m.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
+                    
+                    const bubble = document.createElement('div');
+                    bubble.className = `flex w-full message-enter ${isMe ? 'justify-end' : 'justify-start'}`;
+                    bubble.innerHTML = `
+                        <div class="flex flex-col max-w-[75%] ${isMe ? 'items-end' : 'items-start'}">
+                            <div class="px-4 py-2.5 shadow-sm text-[14px] relative ${
+                                isMe 
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl rounded-tr-sm' 
+                                : 'bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-tl-sm'
+                            }">
+                                ${isMe ? `<div class="text-[9px] text-blue-100 font-bold mb-0.5 uppercase tracking-wide opacity-80">${m.category}</div>` : ''}
+                                <p class="leading-relaxed whitespace-pre-wrap">${m.text}</p>
+                            </div>
+                            <span class="text-[10px] text-gray-400 mt-1 px-1">${time}</span>
+                        </div>
+                    `;
+                    container.appendChild(bubble);
+                });
+
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        // Global Functions
+        window.login = () => {
+            const val = document.getElementById('uidInput').value.trim();
+            if(!val) return alert("Please enter your ID");
+            uid = val;
+            localStorage.setItem('user_uid', uid);
+            init();
+        };
+
+        window.logout = () => {
+            if(confirm("Are you sure you want to exit?")) {
+                localStorage.removeItem('user_uid');
+                uid = '';
+                init();
+            }
+        };
+
+        window.send = async () => {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            input.value = '';
+            input.style.height = 'auto'; // Reset height
+            input.focus();
+
+            try {
+                await addDoc(collection(db, "chat_messages"), {
+                    uid: uid,
+                    text: text,
+                    sender: 'user',
+                    category: selectedCategory,
+                    timestamp: serverTimestamp(),
+                    read: false
+                });
+            } catch(e) {
+                console.error(e);
+                alert("Failed to send. check internet.");
+            }
+        };
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
